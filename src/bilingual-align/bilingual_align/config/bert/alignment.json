@@ -1,0 +1,48 @@
+{
+  "encoder": {
+    "model_path": null,
+    "max_length": 512,
+    "pooling": null,
+    "batch_size": null,
+    "thread_count": null
+  },
+  "alignment": {
+    "mistranslation_threshold": 0.5,
+    "future_match_margin": 0.04,
+    "target_window": 10,
+    "source_lookahead": 3,
+    "max_target_take": 4,
+    "max_addition_skip": 3,
+    "single_nm_source_limit": 220,
+    "single_nm_target_limit": 260,
+    "block_source_lines": 80,
+    "block_source_overlap": 8,
+    "block_target_slack": 8,
+    "source_chunk_char_budget": 24000,
+    "target_chunk_char_budget": 28000,
+    "long_source_line_chars": 1200,
+    "source_unit_char_budget": 700,
+    "max_assign_fragments": 24,
+    "max_atomic_fragment_count": 24,
+    "fine_whitespace_max_tokens": 8,
+    "candidate_score": {
+      "target_skip_penalty": 0.035,
+      "extra_source_penalty": 0.015,
+      "extra_target_penalty": 0.012
+    },
+    "assignment": {
+      "empty_score": 0.34,
+      "extra_fragment_penalty": 0.015,
+      "good_fragment_threshold": 0.52,
+      "addition_fragment_threshold": 0.32
+    },
+    "nm": {
+      "max_group_size": 6,
+      "top_k": 3,
+      "window": 5,
+      "skip": -1.0,
+      "margin": true,
+      "length_penalty": true
+    }
+  }
+}

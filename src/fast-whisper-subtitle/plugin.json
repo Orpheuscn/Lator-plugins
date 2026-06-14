@@ -1,0 +1,2055 @@
+{
+  "schemaVersion": 1,
+  "id": "local.fast-whisper-subtitle",
+  "version": "0.1.0",
+  "label": {
+    "zh-CN": "Fast Whisper 媒体转字幕",
+    "en-US": "Fast Whisper Media Subtitles"
+  },
+  "description": {
+    "zh-CN": "将 FastWhisperSubtitle 后端裁剪为 Lator Python runtime 插件，接收音视频路径并返回结构化字幕片段。",
+    "en-US": "Packages the FastWhisperSubtitle backend as a Lator Python runtime plugin that transcribes media files into structured subtitle segments."
+  },
+  "runtime": {
+    "type": "python",
+    "entry": "plugin_entry:handle",
+    "requirements": [
+      "torch>=2.0.0",
+      "soundfile>=0.12.0",
+      "numpy>=1.24.0",
+      "speechbrain>=0.5.0",
+      "faster-whisper>=1.1.0,<2",
+      "huggingface-hub>=0.20.0,<1.0.0",
+      "silero-vad>=5.1.0,<6"
+    ],
+    "optionalRequirements": [
+      {
+        "id": "pyannote-vad",
+        "requirements": [
+          "pyannote.audio>=4.0.0"
+        ],
+        "when": {
+          "setting": "vadBackend",
+          "equals": "pyannote"
+        }
+      }
+    ]
+  },
+  "permissions": [
+    "filesystem:read",
+    "network:hf-mirror.com"
+  ],
+  "assets": [
+    {
+      "id": "ffmpeg",
+      "type": "archive",
+      "storage": "tools",
+      "source": "https://evermeet.cx/ffmpeg/ffmpeg-8.1.1.zip",
+      "requiredFiles": [
+        "ffmpeg"
+      ],
+      "executable": true
+    },
+    {
+      "id": "faster-whisper-base",
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "Systran/faster-whisper-base",
+      "revision": "main",
+      "shareKey": "huggingface:Systran/faster-whisper-base:main",
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "model.bin",
+          "targetPath": "model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "vocabulary.txt",
+          "targetPath": "vocabulary.txt",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.json",
+          "targetPath": "vocabulary.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/Systran/faster-whisper-base/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "faster-whisper-small",
+      "label": {
+        "zh-CN": "faster-whisper small",
+        "en-US": "faster-whisper small"
+      },
+      "description": {
+        "zh-CN": "比 base 更准确，下载后可在识别弹窗中为本次音视频选择 small。",
+        "en-US": "More accurate than base. Download it, then select small in the recognition dialog for a media file."
+      },
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "Systran/faster-whisper-small",
+      "revision": "main",
+      "shareKey": "huggingface:Systran/faster-whisper-small:main",
+      "optional": true,
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "model.bin",
+          "targetPath": "model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "preprocessor_config.json",
+          "targetPath": "preprocessor_config.json",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.txt",
+          "targetPath": "vocabulary.txt",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.json",
+          "targetPath": "vocabulary.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/Systran/faster-whisper-small/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "faster-whisper-medium",
+      "label": {
+        "zh-CN": "faster-whisper medium",
+        "en-US": "faster-whisper medium"
+      },
+      "description": {
+        "zh-CN": "准确率和体积居中，下载后可在识别弹窗中为本次音视频选择 medium。",
+        "en-US": "A middle ground for accuracy and size. Download it, then select medium in the recognition dialog for a media file."
+      },
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "Systran/faster-whisper-medium",
+      "revision": "main",
+      "shareKey": "huggingface:Systran/faster-whisper-medium:main",
+      "optional": true,
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "model.bin",
+          "targetPath": "model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "preprocessor_config.json",
+          "targetPath": "preprocessor_config.json",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.txt",
+          "targetPath": "vocabulary.txt",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.json",
+          "targetPath": "vocabulary.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/Systran/faster-whisper-medium/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "faster-whisper-large-v3",
+      "label": {
+        "zh-CN": "faster-whisper large-v3",
+        "en-US": "faster-whisper large-v3"
+      },
+      "description": {
+        "zh-CN": "更高准确率的大模型，下载后可在识别弹窗中为本次音视频选择 large-v3。",
+        "en-US": "A higher-accuracy large model. Download it, then select large-v3 in the recognition dialog for a media file."
+      },
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "Systran/faster-whisper-large-v3",
+      "revision": "main",
+      "shareKey": "huggingface:Systran/faster-whisper-large-v3:main",
+      "optional": true,
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "model.bin",
+          "targetPath": "model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "preprocessor_config.json",
+          "targetPath": "preprocessor_config.json",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.txt",
+          "targetPath": "vocabulary.txt",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.json",
+          "targetPath": "vocabulary.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/Systran/faster-whisper-large-v3/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "faster-whisper-large-v3-turbo",
+      "label": {
+        "zh-CN": "faster-whisper large-v3 turbo",
+        "en-US": "faster-whisper large-v3 turbo"
+      },
+      "description": {
+        "zh-CN": "large-v3 turbo 的 CTranslate2 转换模型，下载后可在识别弹窗中为本次音视频选择 turbo。",
+        "en-US": "CTranslate2 conversion of large-v3 turbo. Download it, then select turbo in the recognition dialog for a media file."
+      },
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "dropbox-dash/faster-whisper-large-v3-turbo",
+      "revision": "main",
+      "shareKey": "huggingface:dropbox-dash/faster-whisper-large-v3-turbo:main",
+      "optional": true,
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "model.bin",
+          "targetPath": "model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "preprocessor_config.json",
+          "targetPath": "preprocessor_config.json",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.txt",
+          "targetPath": "vocabulary.txt",
+          "required": false
+        },
+        {
+          "sourcePath": "vocabulary.json",
+          "targetPath": "vocabulary.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/dropbox-dash/faster-whisper-large-v3-turbo/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "pyannote-segmentation-3.0",
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "pyannote/segmentation-3.0",
+      "revision": "main",
+      "shareKey": "huggingface:pyannote/segmentation-3.0:main",
+      "optional": true,
+      "when": {
+        "setting": "vadBackend",
+        "equals": "pyannote"
+      },
+      "files": [
+        {
+          "sourcePath": "pytorch_model.bin",
+          "targetPath": "pytorch_model.bin",
+          "required": true
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/pyannote/segmentation-3.0/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    },
+    {
+      "id": "language-id-voxlingua107-ecapa",
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "speechbrain/lang-id-voxlingua107-ecapa",
+      "revision": "main",
+      "shareKey": "huggingface:speechbrain/lang-id-voxlingua107-ecapa:main",
+      "files": [
+        {
+          "sourcePath": "hyperparams.yaml",
+          "targetPath": "hyperparams.yaml",
+          "required": true
+        },
+        {
+          "sourcePath": "embedding_model.ckpt",
+          "targetPath": "embedding_model.ckpt",
+          "required": true
+        },
+        {
+          "sourcePath": "classifier.ckpt",
+          "targetPath": "classifier.ckpt",
+          "required": true
+        },
+        {
+          "sourcePath": "label_encoder.txt",
+          "targetPath": "label_encoder.txt",
+          "required": true
+        },
+        {
+          "sourcePath": "custom.py",
+          "targetPath": "custom.py",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "label": {
+            "zh-CN": "HF Mirror",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/speechbrain/lang-id-voxlingua107-ecapa/resolve/main",
+          "id": "hf-mirror"
+        }
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "transcribe-media",
+      "kind": "subtitle-media-import"
+    },
+    {
+      "id": "retry-subtitle-segment",
+      "kind": "subtitle-media-import"
+    },
+    {
+      "id": "play-subtitle-segment",
+      "kind": "subtitle-playback"
+    }
+  ],
+  "contributes": {
+    "settings": [
+      {
+        "id": "vadBackend",
+        "type": "select",
+        "title": {
+          "zh-CN": "语音活动检测模型",
+          "en-US": "Voice activity detection model"
+        },
+        "description": {
+          "zh-CN": "Silero 安装更简单；pyannote 准确率更高，但需要 Hugging Face 账号、接受模型条款并提供 token。",
+          "en-US": "Silero is easier to install. pyannote is more accurate, but requires a Hugging Face account, model-term acceptance, and a token."
+        },
+        "default": "silero",
+        "options": [
+          {
+            "value": "silero",
+            "label": {
+              "zh-CN": "Silero VAD（快速安装）",
+              "en-US": "Silero VAD (quick install)"
+            }
+          },
+          {
+            "value": "pyannote",
+            "label": {
+              "zh-CN": "pyannote VAD（高精度）",
+              "en-US": "pyannote VAD (high accuracy)"
+            }
+          }
+        ]
+      }
+    ],
+    "helpLinks": [
+      {
+        "id": "pyannote-segmentation-auth",
+        "label": {
+          "zh-CN": "授权下载 pyannote VAD 模型",
+          "en-US": "Authorize pyannote VAD model download"
+        },
+        "description": {
+          "zh-CN": "pyannote/segmentation-3.0 可能需要先登录 Hugging Face 并同意模型条款。",
+          "en-US": "pyannote/segmentation-3.0 may require signing in to Hugging Face and accepting the model terms first."
+        },
+        "url": "https://huggingface.co/pyannote/segmentation-3.0",
+        "when": {
+          "setting": "vadBackend",
+          "equals": "pyannote"
+        }
+      }
+    ],
+    "subtitleMediaImportProviders": [
+      {
+        "id": "fast-whisper",
+        "title": {
+          "zh-CN": "Fast Whisper 识别",
+          "en-US": "Fast Whisper"
+        },
+        "capability": "transcribe-media",
+        "retryCapability": "retry-subtitle-segment",
+        "fileExtensions": [
+          "mp4",
+          "m4v",
+          "mov",
+          "mkv",
+          "webm",
+          "avi",
+          "mp3",
+          "wav",
+          "m4a",
+          "flac",
+          "aac",
+          "ogg"
+        ],
+        "parameterSchema": [
+          {
+            "id": "model",
+            "type": "select",
+            "title": {
+              "zh-CN": "本次 Whisper 模型",
+              "en-US": "Whisper model for this media"
+            },
+            "description": {
+              "zh-CN": "base 随插件默认安装；small、medium、large-v3、turbo 可在设置页按需下载后为本次音视频选择。",
+              "en-US": "base is installed by default; small, medium, large-v3, and turbo can be downloaded on demand in settings, then selected for this media file."
+            },
+            "default": "base",
+            "options": [
+              {
+                "value": "base",
+                "label": {
+                  "zh-CN": "base",
+                  "en-US": "base"
+                }
+              },
+              {
+                "value": "small",
+                "label": {
+                  "zh-CN": "small",
+                  "en-US": "small"
+                }
+              },
+              {
+                "value": "medium",
+                "label": {
+                  "zh-CN": "medium",
+                  "en-US": "medium"
+                }
+              },
+              {
+                "value": "large-v3",
+                "label": {
+                  "zh-CN": "large-v3",
+                  "en-US": "large-v3"
+                }
+              },
+              {
+                "value": "turbo",
+                "label": {
+                  "zh-CN": "turbo",
+                  "en-US": "turbo"
+                }
+              }
+            ]
+          },
+          {
+            "id": "language",
+            "type": "select",
+            "title": {
+              "zh-CN": "本次识别语言",
+              "en-US": "Recognition language for this media"
+            },
+            "default": "auto",
+            "options": [
+              {
+                "value": "auto",
+                "label": {
+                  "zh-CN": "自动检测",
+                  "en-US": "Auto detect"
+                }
+              },
+              {
+                "value": "en",
+                "label": {
+                  "zh-CN": "英语",
+                  "en-US": "English"
+                }
+              },
+              {
+                "value": "zh",
+                "label": {
+                  "zh-CN": "中文",
+                  "en-US": "Chinese"
+                }
+              },
+              {
+                "value": "yue",
+                "label": {
+                  "zh-CN": "粤语",
+                  "en-US": "Cantonese"
+                }
+              },
+              {
+                "value": "fr",
+                "label": {
+                  "zh-CN": "法语",
+                  "en-US": "French"
+                }
+              },
+              {
+                "value": "de",
+                "label": {
+                  "zh-CN": "德语",
+                  "en-US": "German"
+                }
+              },
+              {
+                "value": "es",
+                "label": {
+                  "zh-CN": "西班牙语",
+                  "en-US": "Spanish"
+                }
+              },
+              {
+                "value": "ja",
+                "label": {
+                  "zh-CN": "日语",
+                  "en-US": "Japanese"
+                }
+              },
+              {
+                "value": "ru",
+                "label": {
+                  "zh-CN": "俄语",
+                  "en-US": "Russian"
+                }
+              },
+              {
+                "value": "it",
+                "label": {
+                  "zh-CN": "意大利语",
+                  "en-US": "Italian"
+                }
+              },
+              {
+                "value": "pt",
+                "label": {
+                  "zh-CN": "葡萄牙语",
+                  "en-US": "Portuguese"
+                }
+              },
+              {
+                "value": "ar",
+                "label": {
+                  "zh-CN": "阿拉伯语",
+                  "en-US": "Arabic"
+                }
+              },
+              {
+                "value": "la",
+                "label": {
+                  "zh-CN": "拉丁语",
+                  "en-US": "Latin"
+                }
+              },
+              {
+                "value": "el",
+                "label": {
+                  "zh-CN": "希腊语",
+                  "en-US": "Greek"
+                }
+              },
+              {
+                "value": "ko",
+                "label": {
+                  "zh-CN": "韩语",
+                  "en-US": "Korean"
+                }
+              },
+              {
+                "value": "nl",
+                "label": {
+                  "zh-CN": "荷兰语",
+                  "en-US": "Dutch"
+                }
+              },
+              {
+                "value": "pl",
+                "label": {
+                  "zh-CN": "波兰语",
+                  "en-US": "Polish"
+                }
+              },
+              {
+                "value": "tr",
+                "label": {
+                  "zh-CN": "土耳其语",
+                  "en-US": "Turkish"
+                }
+              },
+              {
+                "value": "fa",
+                "label": {
+                  "zh-CN": "波斯语",
+                  "en-US": "Persian"
+                }
+              },
+              {
+                "value": "he",
+                "label": {
+                  "zh-CN": "希伯来语",
+                  "en-US": "Hebrew"
+                }
+              },
+              {
+                "value": "uk",
+                "label": {
+                  "zh-CN": "乌克兰语",
+                  "en-US": "Ukrainian"
+                }
+              },
+              {
+                "value": "hi",
+                "label": {
+                  "zh-CN": "印地语",
+                  "en-US": "Hindi"
+                }
+              },
+              {
+                "value": "bn",
+                "label": {
+                  "zh-CN": "孟加拉语",
+                  "en-US": "Bengali"
+                }
+              },
+              {
+                "value": "sa",
+                "label": {
+                  "zh-CN": "梵语",
+                  "en-US": "Sanskrit"
+                }
+              },
+              {
+                "value": "ur",
+                "label": {
+                  "zh-CN": "乌尔都语",
+                  "en-US": "Urdu"
+                }
+              },
+              {
+                "value": "ro",
+                "label": {
+                  "zh-CN": "罗马尼亚语",
+                  "en-US": "Romanian"
+                }
+              },
+              {
+                "value": "cs",
+                "label": {
+                  "zh-CN": "捷克语",
+                  "en-US": "Czech"
+                }
+              },
+              {
+                "value": "sv",
+                "label": {
+                  "zh-CN": "瑞典语",
+                  "en-US": "Swedish"
+                }
+              },
+              {
+                "value": "hu",
+                "label": {
+                  "zh-CN": "匈牙利语",
+                  "en-US": "Hungarian"
+                }
+              },
+              {
+                "value": "da",
+                "label": {
+                  "zh-CN": "丹麦语",
+                  "en-US": "Danish"
+                }
+              },
+              {
+                "value": "fi",
+                "label": {
+                  "zh-CN": "芬兰语",
+                  "en-US": "Finnish"
+                }
+              },
+              {
+                "value": "no",
+                "label": {
+                  "zh-CN": "挪威语",
+                  "en-US": "Norwegian"
+                }
+              },
+              {
+                "value": "sr",
+                "label": {
+                  "zh-CN": "塞尔维亚语",
+                  "en-US": "Serbian"
+                }
+              },
+              {
+                "value": "bg",
+                "label": {
+                  "zh-CN": "保加利亚语",
+                  "en-US": "Bulgarian"
+                }
+              },
+              {
+                "value": "hr",
+                "label": {
+                  "zh-CN": "克罗地亚语",
+                  "en-US": "Croatian"
+                }
+              },
+              {
+                "value": "sk",
+                "label": {
+                  "zh-CN": "斯洛伐克语",
+                  "en-US": "Slovak"
+                }
+              },
+              {
+                "value": "sl",
+                "label": {
+                  "zh-CN": "斯洛文尼亚语",
+                  "en-US": "Slovenian"
+                }
+              },
+              {
+                "value": "ca",
+                "label": {
+                  "zh-CN": "加泰罗尼亚语",
+                  "en-US": "Catalan"
+                }
+              },
+              {
+                "value": "id",
+                "label": {
+                  "zh-CN": "印度尼西亚语",
+                  "en-US": "Indonesian"
+                }
+              },
+              {
+                "value": "vi",
+                "label": {
+                  "zh-CN": "越南语",
+                  "en-US": "Vietnamese"
+                }
+              },
+              {
+                "value": "th",
+                "label": {
+                  "zh-CN": "泰语",
+                  "en-US": "Thai"
+                }
+              },
+              {
+                "value": "ms",
+                "label": {
+                  "zh-CN": "马来语",
+                  "en-US": "Malay"
+                }
+              },
+              {
+                "value": "tl",
+                "label": {
+                  "zh-CN": "塔加路语",
+                  "en-US": "Tagalog"
+                }
+              },
+              {
+                "value": "sw",
+                "label": {
+                  "zh-CN": "斯瓦希里语",
+                  "en-US": "Swahili"
+                }
+              },
+              {
+                "value": "lt",
+                "label": {
+                  "zh-CN": "立陶宛语",
+                  "en-US": "Lithuanian"
+                }
+              },
+              {
+                "value": "lv",
+                "label": {
+                  "zh-CN": "拉脱维亚语",
+                  "en-US": "Latvian"
+                }
+              },
+              {
+                "value": "et",
+                "label": {
+                  "zh-CN": "爱沙尼亚语",
+                  "en-US": "Estonian"
+                }
+              },
+              {
+                "value": "af",
+                "label": {
+                  "zh-CN": "南非荷兰语",
+                  "en-US": "Afrikaans"
+                }
+              },
+              {
+                "value": "am",
+                "label": {
+                  "zh-CN": "阿姆哈拉语",
+                  "en-US": "Amharic"
+                }
+              },
+              {
+                "value": "az",
+                "label": {
+                  "zh-CN": "阿塞拜疆语",
+                  "en-US": "Azerbaijani"
+                }
+              },
+              {
+                "value": "be",
+                "label": {
+                  "zh-CN": "白俄罗斯语",
+                  "en-US": "Belarusian"
+                }
+              },
+              {
+                "value": "bs",
+                "label": {
+                  "zh-CN": "波斯尼亚语",
+                  "en-US": "Bosnian"
+                }
+              },
+              {
+                "value": "eu",
+                "label": {
+                  "zh-CN": "巴斯克语",
+                  "en-US": "Basque"
+                }
+              },
+              {
+                "value": "ka",
+                "label": {
+                  "zh-CN": "格鲁吉亚语",
+                  "en-US": "Georgian"
+                }
+              },
+              {
+                "value": "hy",
+                "label": {
+                  "zh-CN": "亚美尼亚语",
+                  "en-US": "Armenian"
+                }
+              },
+              {
+                "value": "kk",
+                "label": {
+                  "zh-CN": "哈萨克语",
+                  "en-US": "Kazakh"
+                }
+              },
+              {
+                "value": "uz",
+                "label": {
+                  "zh-CN": "乌兹别克语",
+                  "en-US": "Uzbek"
+                }
+              },
+              {
+                "value": "mn",
+                "label": {
+                  "zh-CN": "蒙古语",
+                  "en-US": "Mongolian"
+                }
+              },
+              {
+                "value": "my",
+                "label": {
+                  "zh-CN": "缅甸语",
+                  "en-US": "Burmese"
+                }
+              },
+              {
+                "value": "km",
+                "label": {
+                  "zh-CN": "高棉语",
+                  "en-US": "Khmer"
+                }
+              },
+              {
+                "value": "lo",
+                "label": {
+                  "zh-CN": "老挝语",
+                  "en-US": "Lao"
+                }
+              },
+              {
+                "value": "ne",
+                "label": {
+                  "zh-CN": "尼泊尔语",
+                  "en-US": "Nepali"
+                }
+              },
+              {
+                "value": "si",
+                "label": {
+                  "zh-CN": "僧伽罗语",
+                  "en-US": "Sinhala"
+                }
+              },
+              {
+                "value": "ta",
+                "label": {
+                  "zh-CN": "泰米尔语",
+                  "en-US": "Tamil"
+                }
+              },
+              {
+                "value": "te",
+                "label": {
+                  "zh-CN": "泰卢固语",
+                  "en-US": "Telugu"
+                }
+              },
+              {
+                "value": "mr",
+                "label": {
+                  "zh-CN": "马拉地语",
+                  "en-US": "Marathi"
+                }
+              },
+              {
+                "value": "gu",
+                "label": {
+                  "zh-CN": "古吉拉特语",
+                  "en-US": "Gujarati"
+                }
+              },
+              {
+                "value": "kn",
+                "label": {
+                  "zh-CN": "卡纳达语",
+                  "en-US": "Kannada"
+                }
+              },
+              {
+                "value": "ml",
+                "label": {
+                  "zh-CN": "马拉雅拉姆语",
+                  "en-US": "Malayalam"
+                }
+              },
+              {
+                "value": "pa",
+                "label": {
+                  "zh-CN": "旁遮普语",
+                  "en-US": "Punjabi"
+                }
+              },
+              {
+                "value": "jw",
+                "label": {
+                  "zh-CN": "爪哇语",
+                  "en-US": "Javanese"
+                }
+              },
+              {
+                "value": "su",
+                "label": {
+                  "zh-CN": "巽他语",
+                  "en-US": "Sundanese"
+                }
+              },
+              {
+                "value": "ha",
+                "label": {
+                  "zh-CN": "豪萨语",
+                  "en-US": "Hausa"
+                }
+              },
+              {
+                "value": "yo",
+                "label": {
+                  "zh-CN": "约鲁巴语",
+                  "en-US": "Yoruba"
+                }
+              },
+              {
+                "value": "so",
+                "label": {
+                  "zh-CN": "索马里语",
+                  "en-US": "Somali"
+                }
+              },
+              {
+                "value": "ps",
+                "label": {
+                  "zh-CN": "普什图语",
+                  "en-US": "Pashto"
+                }
+              },
+              {
+                "value": "tg",
+                "label": {
+                  "zh-CN": "塔吉克语",
+                  "en-US": "Tajik"
+                }
+              },
+              {
+                "value": "tk",
+                "label": {
+                  "zh-CN": "土库曼语",
+                  "en-US": "Turkmen"
+                }
+              },
+              {
+                "value": "yi",
+                "label": {
+                  "zh-CN": "意第绪语",
+                  "en-US": "Yiddish"
+                }
+              },
+              {
+                "value": "cy",
+                "label": {
+                  "zh-CN": "威尔士语",
+                  "en-US": "Welsh"
+                }
+              },
+              {
+                "value": "is",
+                "label": {
+                  "zh-CN": "冰岛语",
+                  "en-US": "Icelandic"
+                }
+              },
+              {
+                "value": "mt",
+                "label": {
+                  "zh-CN": "马耳他语",
+                  "en-US": "Maltese"
+                }
+              },
+              {
+                "value": "mk",
+                "label": {
+                  "zh-CN": "马其顿语",
+                  "en-US": "Macedonian"
+                }
+              },
+              {
+                "value": "sq",
+                "label": {
+                  "zh-CN": "阿尔巴尼亚语",
+                  "en-US": "Albanian"
+                }
+              },
+              {
+                "value": "as",
+                "label": {
+                  "zh-CN": "阿萨姆语",
+                  "en-US": "Assamese"
+                }
+              },
+              {
+                "value": "oc",
+                "label": {
+                  "zh-CN": "奥克斯坦语",
+                  "en-US": "Occitan"
+                }
+              },
+              {
+                "value": "ba",
+                "label": {
+                  "zh-CN": "巴什基尔语",
+                  "en-US": "Bashkir"
+                }
+              },
+              {
+                "value": "br",
+                "label": {
+                  "zh-CN": "布列塔尼语",
+                  "en-US": "Breton"
+                }
+              },
+              {
+                "value": "bo",
+                "label": {
+                  "zh-CN": "藏语",
+                  "en-US": "Tibetan"
+                }
+              },
+              {
+                "value": "tt",
+                "label": {
+                  "zh-CN": "鞑靼语",
+                  "en-US": "Tatar"
+                }
+              },
+              {
+                "value": "fo",
+                "label": {
+                  "zh-CN": "法罗语",
+                  "en-US": "Faroese"
+                }
+              },
+              {
+                "value": "ht",
+                "label": {
+                  "zh-CN": "海地克里奥尔语",
+                  "en-US": "Haitian Creole"
+                }
+              },
+              {
+                "value": "gl",
+                "label": {
+                  "zh-CN": "加利西亚语",
+                  "en-US": "Galician"
+                }
+              },
+              {
+                "value": "ln",
+                "label": {
+                  "zh-CN": "林加拉语",
+                  "en-US": "Lingala"
+                }
+              },
+              {
+                "value": "lb",
+                "label": {
+                  "zh-CN": "卢森堡语",
+                  "en-US": "Luxembourgish"
+                }
+              },
+              {
+                "value": "mg",
+                "label": {
+                  "zh-CN": "马尔加什语",
+                  "en-US": "Malagasy"
+                }
+              },
+              {
+                "value": "mi",
+                "label": {
+                  "zh-CN": "毛利语",
+                  "en-US": "Maori"
+                }
+              },
+              {
+                "value": "haw",
+                "label": {
+                  "zh-CN": "夏威夷语",
+                  "en-US": "Hawaiian"
+                }
+              },
+              {
+                "value": "nn",
+                "label": {
+                  "zh-CN": "新挪威语",
+                  "en-US": "Nynorsk"
+                }
+              },
+              {
+                "value": "sd",
+                "label": {
+                  "zh-CN": "信德语",
+                  "en-US": "Sindhi"
+                }
+              },
+              {
+                "value": "sn",
+                "label": {
+                  "zh-CN": "修纳语",
+                  "en-US": "Shona"
+                }
+              }
+            ],
+            "description": {
+              "zh-CN": "选择一种语言会跳过片段语言检测，并强制所有片段按该语言识别；选择自动检测时会按片段检测语言。",
+              "en-US": "Choose one language to skip segment language detection and force all segments to use it. Auto detect uses per-segment language detection."
+            }
+          },
+          {
+            "id": "outputLanguages",
+            "type": "multi-select",
+            "title": {
+              "zh-CN": "输出语言过滤",
+              "en-US": "Output language filter"
+            },
+            "description": {
+              "zh-CN": "多语言影片中只处理并保留选中的语言；不选择则保留全部语言。仅在识别语言为自动检测时生效。",
+              "en-US": "For multilingual media, only process and keep selected languages. Leave empty to keep all languages. Applies only when recognition language is Auto detect."
+            },
+            "default": [],
+            "options": [
+              {
+                "value": "en",
+                "label": {
+                  "zh-CN": "英语",
+                  "en-US": "English"
+                }
+              },
+              {
+                "value": "zh",
+                "label": {
+                  "zh-CN": "中文",
+                  "en-US": "Chinese"
+                }
+              },
+              {
+                "value": "yue",
+                "label": {
+                  "zh-CN": "粤语",
+                  "en-US": "Cantonese"
+                }
+              },
+              {
+                "value": "fr",
+                "label": {
+                  "zh-CN": "法语",
+                  "en-US": "French"
+                }
+              },
+              {
+                "value": "de",
+                "label": {
+                  "zh-CN": "德语",
+                  "en-US": "German"
+                }
+              },
+              {
+                "value": "es",
+                "label": {
+                  "zh-CN": "西班牙语",
+                  "en-US": "Spanish"
+                }
+              },
+              {
+                "value": "ja",
+                "label": {
+                  "zh-CN": "日语",
+                  "en-US": "Japanese"
+                }
+              },
+              {
+                "value": "ru",
+                "label": {
+                  "zh-CN": "俄语",
+                  "en-US": "Russian"
+                }
+              },
+              {
+                "value": "it",
+                "label": {
+                  "zh-CN": "意大利语",
+                  "en-US": "Italian"
+                }
+              },
+              {
+                "value": "pt",
+                "label": {
+                  "zh-CN": "葡萄牙语",
+                  "en-US": "Portuguese"
+                }
+              },
+              {
+                "value": "ar",
+                "label": {
+                  "zh-CN": "阿拉伯语",
+                  "en-US": "Arabic"
+                }
+              },
+              {
+                "value": "la",
+                "label": {
+                  "zh-CN": "拉丁语",
+                  "en-US": "Latin"
+                }
+              },
+              {
+                "value": "el",
+                "label": {
+                  "zh-CN": "希腊语",
+                  "en-US": "Greek"
+                }
+              },
+              {
+                "value": "ko",
+                "label": {
+                  "zh-CN": "韩语",
+                  "en-US": "Korean"
+                }
+              },
+              {
+                "value": "nl",
+                "label": {
+                  "zh-CN": "荷兰语",
+                  "en-US": "Dutch"
+                }
+              },
+              {
+                "value": "pl",
+                "label": {
+                  "zh-CN": "波兰语",
+                  "en-US": "Polish"
+                }
+              },
+              {
+                "value": "tr",
+                "label": {
+                  "zh-CN": "土耳其语",
+                  "en-US": "Turkish"
+                }
+              },
+              {
+                "value": "fa",
+                "label": {
+                  "zh-CN": "波斯语",
+                  "en-US": "Persian"
+                }
+              },
+              {
+                "value": "he",
+                "label": {
+                  "zh-CN": "希伯来语",
+                  "en-US": "Hebrew"
+                }
+              },
+              {
+                "value": "uk",
+                "label": {
+                  "zh-CN": "乌克兰语",
+                  "en-US": "Ukrainian"
+                }
+              },
+              {
+                "value": "hi",
+                "label": {
+                  "zh-CN": "印地语",
+                  "en-US": "Hindi"
+                }
+              },
+              {
+                "value": "bn",
+                "label": {
+                  "zh-CN": "孟加拉语",
+                  "en-US": "Bengali"
+                }
+              },
+              {
+                "value": "sa",
+                "label": {
+                  "zh-CN": "梵语",
+                  "en-US": "Sanskrit"
+                }
+              },
+              {
+                "value": "ur",
+                "label": {
+                  "zh-CN": "乌尔都语",
+                  "en-US": "Urdu"
+                }
+              },
+              {
+                "value": "ro",
+                "label": {
+                  "zh-CN": "罗马尼亚语",
+                  "en-US": "Romanian"
+                }
+              },
+              {
+                "value": "cs",
+                "label": {
+                  "zh-CN": "捷克语",
+                  "en-US": "Czech"
+                }
+              },
+              {
+                "value": "sv",
+                "label": {
+                  "zh-CN": "瑞典语",
+                  "en-US": "Swedish"
+                }
+              },
+              {
+                "value": "hu",
+                "label": {
+                  "zh-CN": "匈牙利语",
+                  "en-US": "Hungarian"
+                }
+              },
+              {
+                "value": "da",
+                "label": {
+                  "zh-CN": "丹麦语",
+                  "en-US": "Danish"
+                }
+              },
+              {
+                "value": "fi",
+                "label": {
+                  "zh-CN": "芬兰语",
+                  "en-US": "Finnish"
+                }
+              },
+              {
+                "value": "no",
+                "label": {
+                  "zh-CN": "挪威语",
+                  "en-US": "Norwegian"
+                }
+              },
+              {
+                "value": "sr",
+                "label": {
+                  "zh-CN": "塞尔维亚语",
+                  "en-US": "Serbian"
+                }
+              },
+              {
+                "value": "bg",
+                "label": {
+                  "zh-CN": "保加利亚语",
+                  "en-US": "Bulgarian"
+                }
+              },
+              {
+                "value": "hr",
+                "label": {
+                  "zh-CN": "克罗地亚语",
+                  "en-US": "Croatian"
+                }
+              },
+              {
+                "value": "sk",
+                "label": {
+                  "zh-CN": "斯洛伐克语",
+                  "en-US": "Slovak"
+                }
+              },
+              {
+                "value": "sl",
+                "label": {
+                  "zh-CN": "斯洛文尼亚语",
+                  "en-US": "Slovenian"
+                }
+              },
+              {
+                "value": "ca",
+                "label": {
+                  "zh-CN": "加泰罗尼亚语",
+                  "en-US": "Catalan"
+                }
+              },
+              {
+                "value": "id",
+                "label": {
+                  "zh-CN": "印度尼西亚语",
+                  "en-US": "Indonesian"
+                }
+              },
+              {
+                "value": "vi",
+                "label": {
+                  "zh-CN": "越南语",
+                  "en-US": "Vietnamese"
+                }
+              },
+              {
+                "value": "th",
+                "label": {
+                  "zh-CN": "泰语",
+                  "en-US": "Thai"
+                }
+              },
+              {
+                "value": "ms",
+                "label": {
+                  "zh-CN": "马来语",
+                  "en-US": "Malay"
+                }
+              },
+              {
+                "value": "tl",
+                "label": {
+                  "zh-CN": "塔加路语",
+                  "en-US": "Tagalog"
+                }
+              },
+              {
+                "value": "sw",
+                "label": {
+                  "zh-CN": "斯瓦希里语",
+                  "en-US": "Swahili"
+                }
+              },
+              {
+                "value": "lt",
+                "label": {
+                  "zh-CN": "立陶宛语",
+                  "en-US": "Lithuanian"
+                }
+              },
+              {
+                "value": "lv",
+                "label": {
+                  "zh-CN": "拉脱维亚语",
+                  "en-US": "Latvian"
+                }
+              },
+              {
+                "value": "et",
+                "label": {
+                  "zh-CN": "爱沙尼亚语",
+                  "en-US": "Estonian"
+                }
+              },
+              {
+                "value": "af",
+                "label": {
+                  "zh-CN": "南非荷兰语",
+                  "en-US": "Afrikaans"
+                }
+              },
+              {
+                "value": "am",
+                "label": {
+                  "zh-CN": "阿姆哈拉语",
+                  "en-US": "Amharic"
+                }
+              },
+              {
+                "value": "az",
+                "label": {
+                  "zh-CN": "阿塞拜疆语",
+                  "en-US": "Azerbaijani"
+                }
+              },
+              {
+                "value": "be",
+                "label": {
+                  "zh-CN": "白俄罗斯语",
+                  "en-US": "Belarusian"
+                }
+              },
+              {
+                "value": "bs",
+                "label": {
+                  "zh-CN": "波斯尼亚语",
+                  "en-US": "Bosnian"
+                }
+              },
+              {
+                "value": "eu",
+                "label": {
+                  "zh-CN": "巴斯克语",
+                  "en-US": "Basque"
+                }
+              },
+              {
+                "value": "ka",
+                "label": {
+                  "zh-CN": "格鲁吉亚语",
+                  "en-US": "Georgian"
+                }
+              },
+              {
+                "value": "hy",
+                "label": {
+                  "zh-CN": "亚美尼亚语",
+                  "en-US": "Armenian"
+                }
+              },
+              {
+                "value": "kk",
+                "label": {
+                  "zh-CN": "哈萨克语",
+                  "en-US": "Kazakh"
+                }
+              },
+              {
+                "value": "uz",
+                "label": {
+                  "zh-CN": "乌兹别克语",
+                  "en-US": "Uzbek"
+                }
+              },
+              {
+                "value": "mn",
+                "label": {
+                  "zh-CN": "蒙古语",
+                  "en-US": "Mongolian"
+                }
+              },
+              {
+                "value": "my",
+                "label": {
+                  "zh-CN": "缅甸语",
+                  "en-US": "Burmese"
+                }
+              },
+              {
+                "value": "km",
+                "label": {
+                  "zh-CN": "高棉语",
+                  "en-US": "Khmer"
+                }
+              },
+              {
+                "value": "lo",
+                "label": {
+                  "zh-CN": "老挝语",
+                  "en-US": "Lao"
+                }
+              },
+              {
+                "value": "ne",
+                "label": {
+                  "zh-CN": "尼泊尔语",
+                  "en-US": "Nepali"
+                }
+              },
+              {
+                "value": "si",
+                "label": {
+                  "zh-CN": "僧伽罗语",
+                  "en-US": "Sinhala"
+                }
+              },
+              {
+                "value": "ta",
+                "label": {
+                  "zh-CN": "泰米尔语",
+                  "en-US": "Tamil"
+                }
+              },
+              {
+                "value": "te",
+                "label": {
+                  "zh-CN": "泰卢固语",
+                  "en-US": "Telugu"
+                }
+              },
+              {
+                "value": "mr",
+                "label": {
+                  "zh-CN": "马拉地语",
+                  "en-US": "Marathi"
+                }
+              },
+              {
+                "value": "gu",
+                "label": {
+                  "zh-CN": "古吉拉特语",
+                  "en-US": "Gujarati"
+                }
+              },
+              {
+                "value": "kn",
+                "label": {
+                  "zh-CN": "卡纳达语",
+                  "en-US": "Kannada"
+                }
+              },
+              {
+                "value": "ml",
+                "label": {
+                  "zh-CN": "马拉雅拉姆语",
+                  "en-US": "Malayalam"
+                }
+              },
+              {
+                "value": "pa",
+                "label": {
+                  "zh-CN": "旁遮普语",
+                  "en-US": "Punjabi"
+                }
+              },
+              {
+                "value": "jw",
+                "label": {
+                  "zh-CN": "爪哇语",
+                  "en-US": "Javanese"
+                }
+              },
+              {
+                "value": "su",
+                "label": {
+                  "zh-CN": "巽他语",
+                  "en-US": "Sundanese"
+                }
+              },
+              {
+                "value": "ha",
+                "label": {
+                  "zh-CN": "豪萨语",
+                  "en-US": "Hausa"
+                }
+              },
+              {
+                "value": "yo",
+                "label": {
+                  "zh-CN": "约鲁巴语",
+                  "en-US": "Yoruba"
+                }
+              },
+              {
+                "value": "so",
+                "label": {
+                  "zh-CN": "索马里语",
+                  "en-US": "Somali"
+                }
+              },
+              {
+                "value": "ps",
+                "label": {
+                  "zh-CN": "普什图语",
+                  "en-US": "Pashto"
+                }
+              },
+              {
+                "value": "tg",
+                "label": {
+                  "zh-CN": "塔吉克语",
+                  "en-US": "Tajik"
+                }
+              },
+              {
+                "value": "tk",
+                "label": {
+                  "zh-CN": "土库曼语",
+                  "en-US": "Turkmen"
+                }
+              },
+              {
+                "value": "yi",
+                "label": {
+                  "zh-CN": "意第绪语",
+                  "en-US": "Yiddish"
+                }
+              },
+              {
+                "value": "cy",
+                "label": {
+                  "zh-CN": "威尔士语",
+                  "en-US": "Welsh"
+                }
+              },
+              {
+                "value": "is",
+                "label": {
+                  "zh-CN": "冰岛语",
+                  "en-US": "Icelandic"
+                }
+              },
+              {
+                "value": "mt",
+                "label": {
+                  "zh-CN": "马耳他语",
+                  "en-US": "Maltese"
+                }
+              },
+              {
+                "value": "mk",
+                "label": {
+                  "zh-CN": "马其顿语",
+                  "en-US": "Macedonian"
+                }
+              },
+              {
+                "value": "sq",
+                "label": {
+                  "zh-CN": "阿尔巴尼亚语",
+                  "en-US": "Albanian"
+                }
+              },
+              {
+                "value": "as",
+                "label": {
+                  "zh-CN": "阿萨姆语",
+                  "en-US": "Assamese"
+                }
+              },
+              {
+                "value": "oc",
+                "label": {
+                  "zh-CN": "奥克斯坦语",
+                  "en-US": "Occitan"
+                }
+              },
+              {
+                "value": "ba",
+                "label": {
+                  "zh-CN": "巴什基尔语",
+                  "en-US": "Bashkir"
+                }
+              },
+              {
+                "value": "br",
+                "label": {
+                  "zh-CN": "布列塔尼语",
+                  "en-US": "Breton"
+                }
+              },
+              {
+                "value": "bo",
+                "label": {
+                  "zh-CN": "藏语",
+                  "en-US": "Tibetan"
+                }
+              },
+              {
+                "value": "tt",
+                "label": {
+                  "zh-CN": "鞑靼语",
+                  "en-US": "Tatar"
+                }
+              },
+              {
+                "value": "fo",
+                "label": {
+                  "zh-CN": "法罗语",
+                  "en-US": "Faroese"
+                }
+              },
+              {
+                "value": "ht",
+                "label": {
+                  "zh-CN": "海地克里奥尔语",
+                  "en-US": "Haitian Creole"
+                }
+              },
+              {
+                "value": "gl",
+                "label": {
+                  "zh-CN": "加利西亚语",
+                  "en-US": "Galician"
+                }
+              },
+              {
+                "value": "ln",
+                "label": {
+                  "zh-CN": "林加拉语",
+                  "en-US": "Lingala"
+                }
+              },
+              {
+                "value": "lb",
+                "label": {
+                  "zh-CN": "卢森堡语",
+                  "en-US": "Luxembourgish"
+                }
+              },
+              {
+                "value": "mg",
+                "label": {
+                  "zh-CN": "马尔加什语",
+                  "en-US": "Malagasy"
+                }
+              },
+              {
+                "value": "mi",
+                "label": {
+                  "zh-CN": "毛利语",
+                  "en-US": "Maori"
+                }
+              },
+              {
+                "value": "haw",
+                "label": {
+                  "zh-CN": "夏威夷语",
+                  "en-US": "Hawaiian"
+                }
+              },
+              {
+                "value": "nn",
+                "label": {
+                  "zh-CN": "新挪威语",
+                  "en-US": "Nynorsk"
+                }
+              },
+              {
+                "value": "sd",
+                "label": {
+                  "zh-CN": "信德语",
+                  "en-US": "Sindhi"
+                }
+              },
+              {
+                "value": "sn",
+                "label": {
+                  "zh-CN": "修纳语",
+                  "en-US": "Shona"
+                }
+              }
+            ]
+          },
+          {
+            "id": "silenceThreshold",
+            "type": "select",
+            "title": {
+              "zh-CN": "断句间隔",
+              "en-US": "Cue split gap"
+            },
+            "default": "2.0",
+            "options": [
+              {
+                "value": "0.5",
+                "label": {
+                  "zh-CN": "0.5 秒",
+                  "en-US": "0.5 s"
+                }
+              },
+              {
+                "value": "1.0",
+                "label": {
+                  "zh-CN": "1.0 秒",
+                  "en-US": "1.0 s"
+                }
+              },
+              {
+                "value": "2.0",
+                "label": {
+                  "zh-CN": "2.0 秒",
+                  "en-US": "2.0 s"
+                }
+              },
+              {
+                "value": "3.0",
+                "label": {
+                  "zh-CN": "3.0 秒",
+                  "en-US": "3.0 s"
+                }
+              }
+            ],
+            "description": {
+              "zh-CN": "两段语音之间静音超过这个时长时，才拆成不同字幕片段。数值越大越容易合并，越小越容易切碎。",
+              "en-US": "Split into separate subtitle cues only when the silence between speech spans exceeds this duration. Higher values merge more; lower values split more."
+            }
+          },
+          {
+            "id": "strict",
+            "type": "toggle",
+            "title": {
+              "zh-CN": "实验性质量标记",
+              "en-US": "Experimental quality marking"
+            },
+            "description": {
+              "zh-CN": "已知幻觉短语会始终过滤。开启后还会用 <del> 标记低置信度字幕。默认关闭，适合测试后再使用。",
+              "en-US": "Known hallucination phrases are always filtered. When enabled, low-confidence subtitles are also marked with <del>. Off by default; use after testing."
+            },
+            "default": false
+          }
+        ]
+      }
+    ],
+    "subtitlePlaybackProviders": [
+      {
+        "id": "fast-whisper-media-playback",
+        "title": {
+          "zh-CN": "媒体片段播放",
+          "en-US": "Media Segment Playback"
+        },
+        "capability": "play-subtitle-segment"
+      }
+    ]
+  }
+}

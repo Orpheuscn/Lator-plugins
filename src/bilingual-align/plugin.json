@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "lator.bilingual-align",
+  "version": "0.1.0",
+  "label": "Bilingual Align",
+  "localizedLabel": {
+    "zh-CN": "双语对齐",
+    "en-US": "Bilingual Align"
+  },
+  "description": "Aligns translated text back to the source line layout with the LaBSE ONNX model.",
+  "localizedDescription": {
+    "zh-CN": "使用 LaBSE ONNX 模型将译文对齐回原文行布局。",
+    "en-US": "Aligns translated text back to the source line layout with the LaBSE ONNX model."
+  },
+  "runtime": {
+    "type": "python",
+    "python": ">=3.12,<3.13",
+    "entry": "bilingual_align",
+    "requirements": [
+      "numpy>=2.0,<2.4",
+      "onnxruntime>=1.15.0",
+      "transformers>=4.30.0"
+    ]
+  },
+  "assets": [
+    {
+      "id": "labse-onnx",
+      "type": "huggingface",
+      "shareKey": "huggingface:sentence-transformers/LaBSE:ac91d6745aefb758c373ef4d37a13ff5e04ad876",
+      "mirrorSources": [
+        {
+          "id": "hf-mirror",
+          "label": {
+            "zh-CN": "国内镜像",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/sentence-transformers/LaBSE/resolve/ac91d6745aefb758c373ef4d37a13ff5e04ad876"
+        }
+      ],
+      "repo": "sentence-transformers/LaBSE",
+      "revision": "ac91d6745aefb758c373ef4d37a13ff5e04ad876",
+      "files": [
+        {
+          "sourcePath": "onnx/model.onnx",
+          "targetPath": "model.onnx",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer_config.json",
+          "targetPath": "tokenizer_config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "vocab.txt",
+          "targetPath": "vocab.txt",
+          "required": true
+        },
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json"
+        },
+        {
+          "sourcePath": "special_tokens_map.json",
+          "targetPath": "special_tokens_map.json"
+        }
+      ],
+      "requiredFiles": [
+        "model.onnx",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "vocab.txt"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "bilingual-align.align",
+      "kind": "streaming-task",
+      "inputSchema": "schemas/align-input.json",
+      "outputSchema": "schemas/align-output.json",
+      "eventSchema": "schemas/align-event.json"
+    }
+  ],
+  "permissions": [
+    "network:huggingface.co",
+    "network:hf-mirror.com"
+  ],
+  "contributes": {
+    "parallelTextAligners": [
+      {
+        "id": "labse",
+        "title": "LaBSE Alignment",
+        "localizedTitle": {
+          "zh-CN": "LaBSE 对齐",
+          "en-US": "LaBSE Alignment"
+        },
+        "capability": "bilingual-align.align",
+        "icon": "alignText"
+      }
+    ],
+    "parallelTranslationImporters": [
+      {
+        "id": "labse-parallel-translation",
+        "title": "Add parallel translation",
+        "localizedTitle": {
+          "zh-CN": "加入平行译文",
+          "en-US": "Add parallel translation"
+        },
+        "capability": "bilingual-align.align",
+        "icon": "alignText",
+        "modes": ["text", "subtitle"]
+      }
+    ]
+  }
+}

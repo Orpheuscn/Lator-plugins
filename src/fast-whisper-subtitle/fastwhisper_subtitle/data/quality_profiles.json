@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "profiles": {
+    "default": {
+      "avgLogprobMin": -0.75,
+      "compressionRatioMin": 0.75,
+      "noSpeechProbMax": 0.35
+    },
+    "base": {
+      "avgLogprobMin": -1.0,
+      "compressionRatioMin": 0.7,
+      "noSpeechProbMax": 0.45
+    },
+    "small": {
+      "avgLogprobMin": -1.0,
+      "compressionRatioMin": 0.7,
+      "noSpeechProbMax": 0.45
+    },
+    "medium": {
+      "avgLogprobMin": -0.75,
+      "compressionRatioMin": 0.75,
+      "noSpeechProbMax": 0.35
+    },
+    "large": {
+      "avgLogprobMin": -0.75,
+      "compressionRatioMin": 0.75,
+      "noSpeechProbMax": 0.35
+    },
+    "large-v3": {
+      "avgLogprobMin": -0.75,
+      "compressionRatioMin": 0.75,
+      "noSpeechProbMax": 0.35
+    },
+    "turbo": {
+      "avgLogprobMin": -0.8,
+      "compressionRatioMin": 0.9,
+      "noSpeechProbMax": 0.01
+    },
+    "large-v3-turbo": {
+      "avgLogprobMin": -0.8,
+      "compressionRatioMin": 0.9,
+      "noSpeechProbMax": 0.01
+    }
+  }
+}

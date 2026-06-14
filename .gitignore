@@ -1,0 +1,32 @@
+# Not published
+src/segment-vector-store/
+
+# Build output (bundles are published as GitHub Releases, not source)
+lator-bundle-build/
+*.lator-plugin
+
+# Local tooling / config
+.claude/
+
+# macOS
+.DS_Store
+
+# Editor / backup
+*.orig
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.bundle-venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+release/

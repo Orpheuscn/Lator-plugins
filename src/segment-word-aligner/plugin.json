@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "id": "local.segment-word-aligner",
+  "version": "0.2.0",
+  "label": {
+    "zh-CN": "片段词对齐",
+    "en-US": "Segment Word Aligner"
+  },
+  "description": {
+    "zh-CN": "使用 aneuraz/awesome-align-with-co（在平行语料上微调的 mBERT）为每个 segment 抽取原文/译文词对齐静态词典。",
+    "en-US": "Uses aneuraz/awesome-align-with-co (mBERT fine-tuned on parallel data) to extract per-segment source/translation word alignment dictionaries."
+  },
+  "runtime": {
+    "type": "python",
+    "entry": "plugin_entry:handle",
+    "requirements": [
+      "hanlp",
+      "safetensors",
+      "stopwordsiso",
+      "sudachidict_core",
+      "sudachipy",
+      "torch",
+      "transformers>=4.40"
+    ]
+  },
+  "permissions": [
+    "project:read",
+    "network:file.hankcs.com",
+    "network:huggingface.co",
+    "network:hf-mirror.com"
+  ],
+  "assets": [
+    {
+      "id": "awesome-align-with-co",
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "aneuraz/awesome-align-with-co",
+      "revision": "main",
+      "shareKey": "huggingface:aneuraz/awesome-align-with-co:main",
+      "mirrorSources": [
+        {
+          "id": "hf-mirror",
+          "label": {
+            "zh-CN": "国内镜像",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/aneuraz/awesome-align-with-co/resolve/main"
+        }
+      ],
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "pytorch_model.bin",
+          "targetPath": "pytorch_model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer_config.json",
+          "targetPath": "tokenizer_config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "vocab.txt",
+          "targetPath": "vocab.txt",
+          "required": true
+        },
+        {
+          "sourcePath": "special_tokens_map.json",
+          "targetPath": "special_tokens_map.json",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "hanlp-coarse-electra-small-zh",
+      "type": "archive",
+      "storage": "models",
+      "source": "https://file.hankcs.com/hanlp/tok/coarse_electra_small_20220616_012050.zip",
+      "requiredFiles": [
+        "coarse_electra_small_20220616_012050/config.json",
+        "coarse_electra_small_20220616_012050/model.pt",
+        "coarse_electra_small_20220616_012050/vocabs.json"
+      ]
+    },
+    {
+      "id": "chinese-electra-180g-small-discriminator",
+      "type": "huggingface",
+      "storage": "models",
+      "repo": "hfl/chinese-electra-180g-small-discriminator",
+      "revision": "main",
+      "shareKey": "huggingface:hfl/chinese-electra-180g-small-discriminator:main",
+      "files": [
+        {
+          "sourcePath": "config.json",
+          "targetPath": "config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "pytorch_model.bin",
+          "targetPath": "pytorch_model.bin",
+          "required": true
+        },
+        {
+          "sourcePath": "vocab.txt",
+          "targetPath": "vocab.txt",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer_config.json",
+          "targetPath": "tokenizer_config.json",
+          "required": true
+        },
+        {
+          "sourcePath": "tokenizer.json",
+          "targetPath": "tokenizer.json",
+          "required": false
+        },
+        {
+          "sourcePath": "special_tokens_map.json",
+          "targetPath": "special_tokens_map.json",
+          "required": false
+        },
+        {
+          "sourcePath": "added_tokens.json",
+          "targetPath": "added_tokens.json",
+          "required": false
+        }
+      ],
+      "mirrorSources": [
+        {
+          "id": "hf-mirror",
+          "label": {
+            "zh-CN": "国内镜像",
+            "en-US": "HF Mirror"
+          },
+          "baseUrl": "https://hf-mirror.com/hfl/chinese-electra-180g-small-discriminator/resolve/main"
+        }
+      ]
+    },
+    {
+      "id": "hanlp-char-table",
+      "type": "archive",
+      "storage": "models",
+      "source": "https://file.hankcs.com/hanlp/utils/char_table_20210602_202632.json.zip",
+      "requiredFiles": [
+        "char_table_20210602_202632.json"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "build-word-alignments",
+      "kind": "streaming-task"
+    }
+  ],
+  "contributes": {
+    "settings": [
+      {
+        "id": "includeWordAlignments",
+        "type": "toggle",
+        "title": {
+          "zh-CN": "包含单词条目",
+          "en-US": "Include word entries"
+        },
+        "description": {
+          "zh-CN": "开启后输出非停用词的单词级对齐；词组条目始终保留。",
+          "en-US": "When enabled, outputs non-stopword word-level alignments; phrase entries are always kept."
+        },
+        "default": true
+      },
+      {
+        "id": "maxPhraseSourceWords",
+        "type": "select",
+        "title": {
+          "zh-CN": "最大原文词组长度",
+          "en-US": "Max source phrase words"
+        },
+        "default": "6",
+        "options": [
+          {
+            "value": "4",
+            "label": {
+              "zh-CN": "4",
+              "en-US": "4"
+            }
+          },
+          {
+            "value": "6",
+            "label": {
+              "zh-CN": "6",
+              "en-US": "6"
+            }
+          },
+          {
+            "value": "8",
+            "label": {
+              "zh-CN": "8",
+              "en-US": "8"
+            }
+          }
+        ]
+      }
+    ],
+    "hostIndexSearchProviders": [
+      {
+        "id": "bilingual-alignment-search",
+        "title": {
+          "zh-CN": "双语搜索",
+          "en-US": "Bilingual Search"
+        },
+        "indexFile": "word-alignments.json",
+        "indexSchema": "word-alignments-v1",
+        "matcher": {
+          "strategies": ["exact", "morphology"],
+          "fields": ["sourceText", "targetText"]
+        }
+      }
+    ],
+    "ribbonButtons": [
+      {
+        "id": "build-segment-word-alignments",
+        "tooltip": {
+          "zh-CN": "生成片段词对齐词典",
+          "en-US": "Build segment word alignment dictionary"
+        },
+        "icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><path d=\"M4 7h7\"/><path d=\"M4 12h5\"/><path d=\"M4 17h7\"/><path d=\"M13 7h7\"/><path d=\"M15 12h5\"/><path d=\"M13 17h7\"/><path d=\"M10 7c2 0 2 10 4 10\"/><path d=\"M10 17c2 0 2-10 4-10\"/></svg>",
+        "capability": "build-word-alignments",
+        "projectBatch": {
+          "scope": "active-root-projects",
+          "payload": "translation-segments-v1",
+          "outputFile": "word-alignments.json",
+          "serial": true,
+          "openProject": true,
+          "pending": "source-target-pairs",
+          "freshness": {
+            "strategy": "translation-pairs-content-hash",
+            "schemaVersion": 1
+          }
+        }
+      }
+    ]
+  }
+}

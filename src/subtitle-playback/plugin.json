@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "id": "lator.subtitle-playback",
+  "version": "0.1.0",
+  "label": "Subtitle Playback",
+  "localizedLabel": {
+    "zh-CN": "字幕播放",
+    "en-US": "Subtitle Playback"
+  },
+  "description": "Adds subtitle segment playback through external executable tools.",
+  "localizedDescription": {
+    "zh-CN": "通过外部二进制工具为字幕片段提供播放能力。",
+    "en-US": "Adds subtitle segment playback through external executable tools."
+  },
+  "runtime": {
+    "type": "executable",
+    "executable": "bin/subtitle-playback-runtime.mjs"
+  },
+  "assets": [
+    {
+      "id": "ffplay-darwin-arm64",
+      "type": "archive",
+      "source": "https://www.osxexperts.net/ffplay81arm.zip",
+      "copyrightCertificateSource": "https://git.ffmpeg.org/gitweb/ffmpeg.git/blob_plain/HEAD:/LICENSE.md",
+      "copyrightCertificateTargetPath": "LICENSE.md",
+      "requiredFiles": [
+        "ffplay"
+      ],
+      "executable": true,
+      "storage": "tools"
+    },
+    {
+      "id": "ffmpeg-darwin-arm64",
+      "type": "archive",
+      "source": "https://www.osxexperts.net/ffmpeg80arm.zip",
+      "copyrightCertificateSource": "https://git.ffmpeg.org/gitweb/ffmpeg.git/blob_plain/HEAD:/LICENSE.md",
+      "copyrightCertificateTargetPath": "LICENSE.md",
+      "requiredFiles": [
+        "ffmpeg"
+      ],
+      "executable": true,
+      "storage": "tools"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "subtitle-playback.ffplay-window",
+      "kind": "subtitle-playback"
+    },
+    {
+      "id": "subtitle-playback.background-video",
+      "kind": "subtitle-playback"
+    }
+  ],
+  "permissions": [
+    "filesystem:read",
+    "network:www.osxexperts.net",
+    "network:git.ffmpeg.org"
+  ],
+  "contributes": {
+    "settings": [
+      {
+        "id": "playbackMode",
+        "type": "select",
+        "title": "Playback mode",
+        "localizedTitle": {
+          "zh-CN": "播放方式",
+          "en-US": "Playback mode"
+        },
+        "description": "Choose how subtitle segments are played.",
+        "localizedDescription": {
+          "zh-CN": "选择字幕片段的播放方式。",
+          "en-US": "Choose how subtitle segments are played."
+        },
+        "default": "background-video",
+        "options": [
+          {
+            "value": "background-video",
+            "label": "Background video",
+            "localizedLabel": {
+              "zh-CN": "面板背景播放",
+              "en-US": "Background video"
+            }
+          },
+          {
+            "value": "ffplay-window",
+            "label": "External window",
+            "localizedLabel": {
+              "zh-CN": "独立窗口播放",
+              "en-US": "External window"
+            }
+          }
+        ]
+      },
+      {
+        "id": "videoSegmentMode",
+        "type": "select",
+        "title": "Video segment quality",
+        "localizedTitle": {
+          "zh-CN": "视频片段质量",
+          "en-US": "Video segment quality"
+        },
+        "description": "Controls the cached video segment generated for background playback.",
+        "localizedDescription": {
+          "zh-CN": "控制面板背景播放时生成的视频缓存片段质量。",
+          "en-US": "Controls the cached video segment generated for background playback."
+        },
+        "default": "source",
+        "options": [
+          {
+            "value": "source",
+            "label": "Original resolution",
+            "localizedLabel": {
+              "zh-CN": "原分辨率",
+              "en-US": "Original resolution"
+            }
+          },
+          {
+            "value": "compressed",
+            "label": "Compressed video",
+            "localizedLabel": {
+              "zh-CN": "压缩视频",
+              "en-US": "Compressed video"
+            }
+          }
+        ]
+      }
+    ],
+    "subtitlePlaybackProviders": [
+      {
+        "id": "background-video",
+        "title": "Background Video",
+        "localizedTitle": {
+          "zh-CN": "背景视频",
+          "en-US": "Background Video"
+        },
+        "capability": "subtitle-playback.background-video",
+        "when": {
+          "setting": "playbackMode",
+          "equals": "background-video"
+        }
+      },
+      {
+        "id": "ffplay-window",
+        "title": "FFplay Window",
+        "localizedTitle": {
+          "zh-CN": "FFplay 独立窗口",
+          "en-US": "FFplay Window"
+        },
+        "capability": "subtitle-playback.ffplay-window",
+        "when": {
+          "setting": "playbackMode",
+          "equals": "ffplay-window"
+        }
+      }
+    ],
+    "inputBindings": [
+      {
+        "id": "play-current-subtitle-segment",
+        "action": "playSubtitleSegmentForPointer",
+        "enabled": true,
+        "scope": "workspace",
+        "ignoreEditable": true,
+        "preventDefault": true,
+        "input": {
+          "type": "key-combo",
+          "key": "p"
+        }
+      }
+    ]
+  }
+}
