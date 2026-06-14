@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "lator.subtitle-playback",
+  "id": "local.subtitle-playback",
   "version": "0.1.0",
   "label": "Subtitle Playback",
   "localizedLabel": {
