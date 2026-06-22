@@ -230,6 +230,7 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
     full_waveform, sample_rate = call_with_plugin_logs(read_mono_audio, audio_file)
 
     host_segments: list[dict[str, Any]] = []
+    raw_transcription_segments: list[dict[str, Any]] = []
     language_stats: dict[str, int] = {}
     total_segments = len(segments_to_process)
 
@@ -277,6 +278,14 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
         if detected_language:
             language_stats[detected_language] = language_stats.get(detected_language, 0) + 1
 
+        raw_transcription_segments.append(build_raw_transcription_segment(
+            index=index,
+            start_ms=start_ms,
+            end_ms=end_ms,
+            language=segment_language,
+            whisper_result=whisper_result,
+        ))
+
         new_segments = build_host_segments(
             whisper_result,
             start_ms,
@@ -303,6 +312,7 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
         detected_speech_segments=len(continuous_segments),
         processed_speech_segments=len(segments_to_process),
     )
+    result["files"] = [build_raw_transcription_file(config, result, raw_transcription_segments)]
     yield {"type": "done", "data": result}
 
 
@@ -637,6 +647,73 @@ def build_result(
     if extra:
         result.update(extra)
     return result
+
+
+def build_raw_transcription_segment(
+    index: int,
+    start_ms: float,
+    end_ms: float,
+    language: str | None,
+    whisper_result: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "index": index,
+        "startMs": start_ms,
+        "endMs": end_ms,
+        "language": language,
+        "whisperResult": to_json_safe(whisper_result),
+    }
+
+
+def build_raw_transcription_file(
+    config: TranscriptionConfig,
+    result: dict[str, Any],
+    raw_segments: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "name": build_raw_transcription_file_name(config.input_file),
+        "content": {
+            "schemaVersion": 1,
+            "kind": "fast-whisper-subtitle-transcription",
+            "media": result.get("media"),
+            "model": config.model,
+            "task": config.task,
+            "language": config.language,
+            "outputLanguages": config.output_languages,
+            "beamSize": config.beam_size,
+            "computeType": config.compute_type,
+            "strict": config.strict,
+            "vadBackend": config.vad_backend,
+            "silenceThreshold": config.silence_threshold,
+            "speechPad": config.speech_pad,
+            "detectedLanguage": result.get("detectedLanguage"),
+            "languageStats": result.get("languageStats"),
+            "detectedSpeechSegments": result.get("detectedSpeechSegments"),
+            "processedSpeechSegments": result.get("processedSpeechSegments"),
+            "segments": result.get("segments"),
+            "srt": result.get("srt"),
+            "rawSegments": raw_segments,
+        },
+    }
+
+
+def build_raw_transcription_file_name(input_file: str) -> str:
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", Path(input_file).stem).strip(".-_")
+    return f"{stem or 'media'}.fast-whisper-subtitle.json"
+
+
+def to_json_safe(value: Any) -> Any:
+    if value is None or isinstance(value, (str, bool)):
+        return value
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(key): to_json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [to_json_safe(item) for item in value]
+    return str(value)
 
 
 def call_with_plugin_logs(fn: Callable[..., T], *args: Any, **kwargs: Any) -> T:
