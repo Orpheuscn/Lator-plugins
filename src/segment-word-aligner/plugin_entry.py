@@ -595,14 +595,10 @@ def resolve_hanlp_zh_model() -> tuple[str, dict[str, Any]]:
             overrides["transformer"] = electra
         char_table = resolve_hanlp_char_table_path()
         if char_table:
-            # Mirror the model's config.json transform but point the mapper at the
-            # locally bundled char table instead of the remote zip.
-            overrides["transform"] = {
-                "classpath": "hanlp.common.transform.NormalizeCharacter",
-                "src": "token",
-                "dst": "token",
-                "mapper": char_table,
-            }
+            # HanLP expects a callable transform object at prediction time; passing
+            # the config dict through load overrides leaves a plain dict in the runtime config.
+            from hanlp.common.transform import NormalizeCharacter  # type: ignore
+            overrides["transform"] = NormalizeCharacter(char_table, src="token", dst="token")
         return str(model_dir), overrides
 
     return HANLP_ZH_TOK_MODEL, {}
