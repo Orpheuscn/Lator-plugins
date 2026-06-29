@@ -178,12 +178,12 @@ const manifestPath = path.join(pluginRoot, 'plugin.json')
 const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
 
 manifest.label = {
-  'zh-CN': 'Fast Whisper 媒体转字幕（pyannote）',
-  'en-US': 'Fast Whisper Media Subtitles (pyannote)'
+  'zh-CN': 'Lator 转写（高精度）',
+  'en-US': 'Lator Transcribe (High Accuracy)'
 }
 manifest.description = {
-  'zh-CN': '内置 pyannote VAD 模型的 Fast Whisper 字幕插件版本，不安装 Silero VAD。',
-  'en-US': 'Fast Whisper subtitle plugin variant with bundled pyannote VAD model and no Silero VAD dependency.'
+  'zh-CN': '内置高精度语音分段模型的 Lator 转写版本。',
+  'en-US': 'Lator Transcribe variant with a bundled high-accuracy voice segmentation model.'
 }
 manifest.runtime.requirements = Array.from(new Set([
   ...manifest.runtime.requirements.filter(item => !/^silero-vad\b/i.test(item)),
