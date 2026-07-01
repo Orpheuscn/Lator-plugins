@@ -359,7 +359,30 @@
           "baseUrl": "https://hf-mirror.com/pyannote/segmentation-3.0/resolve/main",
           "id": "hf-mirror"
         }
-      ]
+      ],
+      "authorization": {
+        "provider": "huggingface",
+        "title": {
+          "zh-CN": "授权下载高精度 VAD 模型",
+          "en-US": "Authorize high-accuracy VAD model download"
+        },
+        "description": {
+          "zh-CN": "该模型需要先在 Hugging Face 登录并同意模型条款，然后输入可访问该模型的 token。",
+          "en-US": "This model requires signing in to Hugging Face, accepting the model terms, and entering a token that can access it."
+        },
+        "links": [
+          {
+            "label": {
+              "zh-CN": "打开模型授权页面",
+              "en-US": "Open model authorization page"
+            },
+            "url": "https://huggingface.co/pyannote/segmentation-3.0"
+          }
+        ],
+        "validation": {
+          "filePath": "pytorch_model.bin"
+        }
+      }
     },
     {
       "id": "language-id-voxlingua107-ecapa",
@@ -451,24 +474,6 @@
             }
           }
         ]
-      }
-    ],
-    "helpLinks": [
-      {
-        "id": "pyannote-segmentation-auth",
-        "label": {
-          "zh-CN": "授权下载 pyannote VAD 模型",
-          "en-US": "Authorize pyannote VAD model download"
-        },
-        "description": {
-          "zh-CN": "pyannote/segmentation-3.0 可能需要先登录 Hugging Face 并同意模型条款。",
-          "en-US": "pyannote/segmentation-3.0 may require signing in to Hugging Face and accepting the model terms first."
-        },
-        "url": "https://huggingface.co/pyannote/segmentation-3.0",
-        "when": {
-          "setting": "vadBackend",
-          "equals": "pyannote"
-        }
       }
     ],
     "subtitleMediaImportProviders": [
