@@ -119,12 +119,7 @@ directories work for those values.
 
 ## Bundle Packaging
 
-This plugin is distributed as two `.lator-plugin` bundle variants:
-
-- **Flexible VAD bundle**: keeps the `vadBackend` setting so users can choose Silero or pyannote. The wheelhouse includes both `silero-vad` and the optional `pyannote.audio` dependency group.
-- **Bundled pyannote bundle**: removes Silero from runtime dependencies, removes the `vadBackend` setting, forces `vad_backend="pyannote"`, and embeds the local `pyannote/segmentation-3.0` model as a bundled asset.
-
-Do not maintain two complete source trees. Keep this directory as the only source of truth, then create a temporary staging copy for the pyannote-only variant when packaging.
+The bundle keeps the standard `vadBackend` setting so users can choose Silero or pyannote. The pyannote model has separate Hugging Face access terms, so users who choose High Accuracy mode must authorize and download that model through the normal Lator asset flow.
 
 The examples assume:
 
@@ -132,13 +127,12 @@ The examples assume:
 HOST=/path/to/Lator-Electron
 PLUGIN=/path/to/Lator-plugins/src/fast-whisper-subtitle
 OUT=/path/to/lator-bundle-build
-PYANNOTE_MODEL="$HOME/.lator/models/huggingface/pyannote/segmentation-3.0/main"
 cd "$HOST"
 ```
 
-### Build the Flexible VAD Bundle
+### Build a Bundle
 
-This bundle keeps the plugin source unchanged and includes every optional requirement group in the wheelhouse:
+This command keeps the plugin source unchanged and includes every optional Python requirement group in the wheelhouse. Including `pyannote.audio` lets the High Accuracy mode work after the user separately authorizes and downloads the pyannote model.
 
 ```bash
 npm run plugin:bundle -- "$PLUGIN" \
@@ -155,122 +149,23 @@ Expected result:
 ```text
 fast-whisper-subtitle-darwin-arm64.lator-plugin
   plugin.json                     # keeps vadBackend setting
-  bundle.json                     # no bundledAssets
+  bundle.json                     # no bundledAssets entry
   requirements.lock
-  wheelhouse/darwin-arm64-cp312/  # includes silero-vad and pyannote.audio
+  wheelhouse/darwin-arm64-cp312/  # includes runtime wheels, including optional pyannote.audio
 ```
 
-### Build the Bundled pyannote Bundle
-
-Create a temporary copy and patch only that copy before calling the host bundle builder:
-
-```bash
-STAGING_ROOT=$(mktemp -d /private/tmp/lator-fast-whisper-pyannote-XXXXXX)
-STAGING_PLUGIN="$STAGING_ROOT/fast-whisper-subtitle-pyannote"
-rsync -a --exclude .git --exclude .venv --exclude node_modules --exclude __pycache__ --exclude .pytest_cache --exclude .mypy_cache --exclude .ruff_cache --exclude dist --exclude release --exclude .DS_Store "$PLUGIN/" "$STAGING_PLUGIN/"
-
-node - "$STAGING_PLUGIN" <<'NODE'
-import { promises as fs } from 'node:fs'
-import path from 'node:path'
-
-const pluginRoot = process.argv[2]
-const manifestPath = path.join(pluginRoot, 'plugin.json')
-const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
-
-manifest.label = {
-  'zh-CN': '字幕转写',
-  'en-US': 'Subtitle Transcription'
-}
-manifest.description = {
-  'zh-CN': '将音频或视频中的人声转写为可编辑字幕，内置高精度语音分段模型。',
-  'en-US': 'Transcribes speech from audio or video into editable subtitles, with a bundled high-accuracy speech segmentation model.'
-}
-manifest.runtime.requirements = Array.from(new Set([
-  ...manifest.runtime.requirements.filter(item => !/^silero-vad\b/i.test(item)),
-  'pyannote.audio>=4.0.0'
-]))
-delete manifest.runtime.optionalRequirements
-
-for (const asset of manifest.assets || []) {
-  if (asset.id === 'pyannote-segmentation-3.0') {
-    delete asset.optional
-    delete asset.when
-  }
-}
-
-if (manifest.contributes?.settings) {
-  manifest.contributes.settings = manifest.contributes.settings.filter(item => item.id !== 'vadBackend')
-}
-if (manifest.contributes?.helpLinks) {
-  manifest.contributes.helpLinks = manifest.contributes.helpLinks.filter(item => item.id !== 'pyannote-segmentation-auth')
-}
-await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
-
-const configPath = path.join(pluginRoot, 'fastwhisper_subtitle/config.py')
-let configText = await fs.readFile(configPath, 'utf8')
-configText = configText.replace('"vad_backend": "silero"', '"vad_backend": "pyannote"')
-await fs.writeFile(configPath, configText)
-
-const pipelinePath = path.join(pluginRoot, 'fastwhisper_subtitle/pipeline.py')
-let pipelineText = await fs.readFile(pipelinePath, 'utf8')
-pipelineText = pipelineText.replace(
-`        vad_backend=normalize_choice(\n            read_parameter(parameter_values, "vadBackend", DEFAULT_CONFIG["vad_backend"]),\n            {"silero", "pyannote"},\n            DEFAULT_CONFIG["vad_backend"],\n        ),`,
-'        vad_backend="pyannote",'
-)
-await fs.writeFile(pipelinePath, pipelineText)
-
-const requirementsPath = path.join(pluginRoot, 'requirements.txt')
-try {
-  let requirementsText = await fs.readFile(requirementsPath, 'utf8')
-  requirementsText = requirementsText
-    .split(/\r?\n/)
-    .filter(line => !/^silero-vad\b/i.test(line.trim()))
-    .join('\n')
-    .trimEnd()
-  if (!/^pyannote\.audio\b/im.test(requirementsText)) {
-    requirementsText += '\npyannote.audio>=4.0.0'
-  }
-  await fs.writeFile(requirementsPath, `${requirementsText}\n`)
-} catch (error) {
-  if (error?.code !== 'ENOENT') throw error
-}
-NODE
-
-npm run plugin:bundle -- "$STAGING_PLUGIN" \
-  --python 3.12 \
-  --platform darwin-arm64 \
-  --uv .bundle-venv/bin/uv \
-  --python-bin .bundle-venv/bin/python \
-  --bundle-asset "pyannote-segmentation-3.0=$PYANNOTE_MODEL" \
-  --out "$OUT/fast-whisper-subtitle-pyannote-darwin-arm64.lator-plugin"
-```
-
-Expected result:
-
-```text
-fast-whisper-subtitle-pyannote-darwin-arm64.lator-plugin
-  plugin.json                     # no vadBackend setting, no silero-vad
-  bundle.json                     # has bundledAssets entry
-  bundled-assets/pyannote-segmentation-3.0/pytorch_model.bin
-  requirements.lock
-  wheelhouse/darwin-arm64-cp312/  # includes pyannote.audio, excludes silero-vad
-```
-
-### Verify the Bundles
+### Verify the Bundle
 
 ```bash
 unzip -p "$OUT/fast-whisper-subtitle-darwin-arm64.lator-plugin" \
   local.fast-whisper-subtitle/bundle.json
 
-unzip -p "$OUT/fast-whisper-subtitle-pyannote-darwin-arm64.lator-plugin" \
-  local.fast-whisper-subtitle/bundle.json
-
-unzip -l "$OUT/fast-whisper-subtitle-pyannote-darwin-arm64.lator-plugin" \
-  | rg 'bundled-assets|pytorch_model.bin'
-
-unzip -p "$OUT/fast-whisper-subtitle-pyannote-darwin-arm64.lator-plugin" \
-  local.fast-whisper-subtitle/plugin.json \
-  | rg 'silero|vadBackend|optionalRequirements|pyannote.audio|pyannote-segmentation-3.0'
+unzip -l "$OUT/fast-whisper-subtitle-darwin-arm64.lator-plugin" \
+  | rg 'bundled-assets|pyannote-segmentation-3.0'
 ```
 
-The final check should only show `pyannote.audio` and `pyannote-segmentation-3.0`; it should not show `silero`, `vadBackend`, or `optionalRequirements`.
+The second command should print nothing. If it shows `bundled-assets` or `pyannote-segmentation-3.0`, the bundle is incorrectly redistributing the pyannote model.
+
+## License
+
+This plugin is distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE).

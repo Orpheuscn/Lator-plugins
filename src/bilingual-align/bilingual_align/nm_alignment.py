@@ -1,4 +1,9 @@
-"""Two-pass embedding N:M sentence alignment."""
+"""Two-pass embedding N:M sentence alignment.
+
+This module adapts Bertalign's GPL-3.0 licensed two-step sentence
+alignment approach for Lator's layout-preserving plugin pipeline.
+Original project: https://github.com/bfsujason/bertalign
+"""
 
 from __future__ import annotations
 

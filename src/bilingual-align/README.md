@@ -119,6 +119,8 @@ Alignment tuning lives in `bilingual_align/config/bert/alignment.json`. The most
 - `alignment.assignment`: fragment assignment and addition thresholds.
 - `alignment.mistranslation_threshold`: low-confidence audit threshold.
 
-## Attribution
+## License
 
-Part of the N:M alignment implementation is based on Bertalign's two-step sentence alignment approach: first finding approximate 1:1 anchor points, then using dynamic programming to extract valid 1:many, many:1, and many:many alignments. The original Bertalign repository is available at [bfsujason/bertalign](https://github.com/bfsujason/bertalign).
+This plugin is distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE).
+
+Part of the N:M alignment implementation is derived from Bertalign's GPL-3.0 licensed two-step sentence alignment approach. The implementation has been adapted for Lator's plugin runtime, LaBSE ONNX embeddings, streaming row updates, and layout-preserving post-processing. The original Bertalign repository is available at [bfsujason/bertalign](https://github.com/bfsujason/bertalign).

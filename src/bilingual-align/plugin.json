@@ -113,8 +113,12 @@
         },
         "capability": "bilingual-align.align",
         "icon": "alignText",
-        "modes": ["text", "subtitle"]
+        "modes": [
+          "text",
+          "subtitle"
+        ]
       }
     ]
-  }
+  },
+  "license": "GPL-3.0-only"
 }

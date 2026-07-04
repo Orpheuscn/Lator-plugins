@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "local.segment-word-aligner",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "label": {
     "zh-CN": "语汇质检",
     "en-US": "Lexicon QA"
@@ -249,5 +249,6 @@
         }
       }
     ]
-  }
+  },
+  "license": "GPL-3.0-only"
 }

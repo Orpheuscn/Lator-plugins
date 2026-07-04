@@ -6,11 +6,11 @@ This repository currently contains three maintained plugins. Each plugin lives u
 
 ## Plugins
 
-| Plugin | Version | Display name | What it does |
-|---|---:|---|---|
-| [bilingual-align](src/bilingual-align) | 0.1.0 | Bilingual Align | Aligns translated text back to the source line layout with LaBSE embeddings and N:M alignment. |
-| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.0 | Subtitle Transcription | Transcribes speech from audio or video into editable subtitles using local faster-whisper models. |
-| [segment-word-aligner](src/segment-word-aligner) | 0.2.0 | Lexicon QA | Extracts reusable source and translation term pairs for terminology consistency checks. |
+| Plugin | Version | Display name | License | What it does |
+|---|---:|---|---|---|
+| [bilingual-align](src/bilingual-align) | 0.1.0 | Bilingual Align | GPL-3.0 | Aligns translated text back to the source line layout with LaBSE embeddings and N:M alignment. |
+| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.0 | Subtitle Transcription | GPL-3.0 | Transcribes speech from audio or video into editable subtitles using local faster-whisper models. |
+| [segment-word-aligner](src/segment-word-aligner) | 0.1.0 | Lexicon QA | GPL-3.0 | Extracts reusable source and translation term pairs for terminology consistency checks. |
 
 ## Repository Layout
 
@@ -20,6 +20,10 @@ src/
   fast-whisper-subtitle/
   segment-word-aligner/
 ```
+
+## Licenses
+
+This repository and each plugin are distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE) and the `LICENSE` file inside each plugin directory.
 
 ## Plugin Documentation
 

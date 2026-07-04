@@ -91,3 +91,7 @@ Lator installs plugin dependencies into the plugin virtual environment. For manu
 ```bash
 python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org hanlp safetensors stopwordsiso sudachidict_core sudachipy torch 'transformers>=4.40'
 ```
+
+## License
+
+This plugin is distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE).

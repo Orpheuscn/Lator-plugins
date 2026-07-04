@@ -2060,5 +2060,6 @@
         "capability": "play-subtitle-segment"
       }
     ]
-  }
+  },
+  "license": "GPL-3.0-only"
 }
