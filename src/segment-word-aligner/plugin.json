@@ -3,12 +3,12 @@
   "id": "local.segment-word-aligner",
   "version": "0.2.0",
   "label": {
-    "zh-CN": "片段词对齐",
-    "en-US": "Segment Word Aligner"
+    "zh-CN": "语汇质检",
+    "en-US": "Lexicon QA"
   },
   "description": {
-    "zh-CN": "使用 aneuraz/awesome-align-with-co（在平行语料上微调的 mBERT）为每个 segment 抽取原文/译文词对齐静态词典。",
-    "en-US": "Uses aneuraz/awesome-align-with-co (mBERT fine-tuned on parallel data) to extract per-segment source/translation word alignment dictionaries."
+    "zh-CN": "语汇一致性检查工具。基于项目中的原文和译文抽取可复用语汇条目，帮助检查译文用词是否一致。",
+    "en-US": "A terminology consistency QA tool that extracts reusable source and translation term pairs from project segments to help check wording consistency."
   },
   "runtime": {
     "type": "python",
@@ -163,12 +163,12 @@
         "id": "includeWordAlignments",
         "type": "toggle",
         "title": {
-          "zh-CN": "包含单词条目",
-          "en-US": "Include word entries"
+          "zh-CN": "包含词级语汇",
+          "en-US": "Include word-level terms"
         },
         "description": {
-          "zh-CN": "开启后输出非停用词的单词级对齐；词组条目始终保留。",
-          "en-US": "When enabled, outputs non-stopword word-level alignments; phrase entries are always kept."
+          "zh-CN": "开启后保留非停用词的词级语汇条目；词组条目始终保留。",
+          "en-US": "When enabled, keeps non-stopword word-level term entries; phrase entries are always retained."
         },
         "default": true
       },
@@ -176,8 +176,8 @@
         "id": "maxPhraseSourceWords",
         "type": "select",
         "title": {
-          "zh-CN": "最大原文词组长度",
-          "en-US": "Max source phrase words"
+          "zh-CN": "原文词组长度上限",
+          "en-US": "Source phrase length limit"
         },
         "default": "6",
         "options": [
@@ -209,14 +209,20 @@
       {
         "id": "bilingual-alignment-search",
         "title": {
-          "zh-CN": "双语搜索",
-          "en-US": "Bilingual Search"
+          "zh-CN": "语汇检索",
+          "en-US": "Lexicon Search"
         },
         "indexFile": "word-alignments.json",
         "indexSchema": "word-alignments-v1",
         "matcher": {
-          "strategies": ["exact", "morphology"],
-          "fields": ["sourceText", "targetText"]
+          "strategies": [
+            "exact",
+            "morphology"
+          ],
+          "fields": [
+            "sourceText",
+            "targetText"
+          ]
         }
       }
     ],
@@ -224,8 +230,8 @@
       {
         "id": "build-segment-word-alignments",
         "tooltip": {
-          "zh-CN": "生成片段词对齐词典",
-          "en-US": "Build segment word alignment dictionary"
+          "zh-CN": "语汇质检",
+          "en-US": "Lexicon QA"
         },
         "icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><path d=\"M4 7h7\"/><path d=\"M4 12h5\"/><path d=\"M4 17h7\"/><path d=\"M13 7h7\"/><path d=\"M15 12h5\"/><path d=\"M13 17h7\"/><path d=\"M10 7c2 0 2 10 4 10\"/><path d=\"M10 17c2 0 2-10 4-10\"/></svg>",
         "capability": "build-word-alignments",

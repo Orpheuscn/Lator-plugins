@@ -7,10 +7,10 @@
     "zh-CN": "双语对齐",
     "en-US": "Bilingual Align"
   },
-  "description": "Aligns translated text back to the source line layout with the LaBSE ONNX model.",
+  "description": "Aligns translated text back to the source line layout with the Bert model.",
   "localizedDescription": {
-    "zh-CN": "使用 LaBSE ONNX 模型将译文对齐回原文行布局。",
-    "en-US": "Aligns translated text back to the source line layout with the LaBSE ONNX model."
+    "zh-CN": "使用 Bert 模型将译文对齐回原文行布局。",
+    "en-US": "Aligns translated text back to the source line layout with the Bert model."
   },
   "runtime": {
     "type": "python",
@@ -94,10 +94,10 @@
     "parallelTextAligners": [
       {
         "id": "labse",
-        "title": "LaBSE Alignment",
+        "title": "Bert Alignment",
         "localizedTitle": {
-          "zh-CN": "LaBSE 对齐",
-          "en-US": "LaBSE Alignment"
+          "zh-CN": "Bert 对齐",
+          "en-US": "Bert Alignment"
         },
         "capability": "bilingual-align.align",
         "icon": "alignText"

@@ -1,31 +1,38 @@
 # Lator Plugins
 
-A collection of plugins for the [Lator](https://github.com/Orpheuscn) translation/subtitle workspace.
+A source repository for Lator workspace plugins.
 
-This repository holds the **source** for each plugin. Pre-built, installable bundles
-(`.lator-plugin`) are attached to the corresponding [GitHub Releases](../../releases).
+This repository currently contains three maintained plugins. Each plugin lives under `src/` with its own `plugin.json`, runtime code, assets declaration, and plugin-specific documentation where applicable.
 
 ## Plugins
 
-| Plugin | Version | What it does | Release |
-|---|---|---|---|
-| [bilingual-align](src/bilingual-align) | 0.1.0 | Sentence-level bilingual alignment using LaBSE (ONNX). | `bilingual-align-v0.1.0` |
-| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.0 | Media subtitle recognition: FFmpeg + VAD + faster-whisper. | `fast-whisper-subtitle-v0.1.0` |
-| [segment-word-aligner](src/segment-word-aligner) | 0.2.0 | Per-segment source/translation word-alignment dictionaries (awesome-align + HanLP). | `segment-word-aligner-v0.2.0` |
-| [subtitle-playback](src/subtitle-playback) | 0.1.0 | Subtitle playback via bundled ffplay/ffmpeg. | `subtitle-playback-v0.1.0` |
+| Plugin | Version | Display name | What it does |
+|---|---:|---|---|
+| [bilingual-align](src/bilingual-align) | 0.1.0 | Bilingual Align | Aligns translated text back to the source line layout with LaBSE embeddings and N:M alignment. |
+| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.0 | Subtitle Transcription | Transcribes speech from audio or video into editable subtitles using local faster-whisper models. |
+| [segment-word-aligner](src/segment-word-aligner) | 0.2.0 | Lexicon QA | Extracts reusable source and translation term pairs for terminology consistency checks. |
 
-## Installing a bundle
+## Repository Layout
 
-1. Open the [Releases](../../releases) page and download the `.lator-plugin` (or zip) for the plugin you want.
-2. Install it from within Lator.
+```text
+src/
+  bilingual-align/
+  fast-whisper-subtitle/
+  segment-word-aligner/
+```
 
-> Bundles are currently built for **macOS arm64 (darwin-arm64)**.
+## Plugin Documentation
 
-`fast-whisper-subtitle` ships two bundle variants in its release:
+- [Bilingual Align README](src/bilingual-align/README.md)
+- [Subtitle Transcription README](src/fast-whisper-subtitle/README.md)
+- [Lexicon QA README](src/segment-word-aligner/README.md)
 
-- **Flexible VAD** — keeps the `vadBackend` setting (Silero or pyannote).
-- **Bundled pyannote** — pyannote VAD only, with the segmentation model embedded.
+## Installation
 
-## Per-plugin docs
+This repository tracks plugin source code. Installable `.lator-plugin` bundles are produced separately from these sources when a release build is needed.
 
-Each plugin's own `README.md` (linked above) documents its models, assets, settings, and build steps.
+Python dependencies must be installed into each plugin's virtual environment. When installing manually, use the trusted PyPI hosts required by the local development environment:
+
+```bash
+python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org <packages>
+```

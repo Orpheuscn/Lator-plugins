@@ -187,7 +187,7 @@ def build_word_alignments(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
 
     yield {
         "stage": "prepare",
-        "message": f"Preparing {len(segments)} segments for word alignment",
+        "message": f"Preparing {len(segments)} segments for lexicon QA",
         "total": len(segments),
     }
 
@@ -219,7 +219,7 @@ def build_word_alignments(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
         })
         yield {
             "stage": "alignment",
-            "message": f"Aligned {index + 1}/{len(segments)} segments",
+            "message": f"Checked {index + 1}/{len(segments)} segments",
             "current": index + 1,
             "total": len(segments),
         }

@@ -178,12 +178,12 @@ const manifestPath = path.join(pluginRoot, 'plugin.json')
 const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
 
 manifest.label = {
-  'zh-CN': 'Lator 转写（高精度）',
-  'en-US': 'Lator Transcribe (High Accuracy)'
+  'zh-CN': '字幕转写',
+  'en-US': 'Subtitle Transcription'
 }
 manifest.description = {
-  'zh-CN': '内置高精度语音分段模型的 Lator 转写版本。',
-  'en-US': 'Lator Transcribe variant with a bundled high-accuracy voice segmentation model.'
+  'zh-CN': '将音频或视频中的人声转写为可编辑字幕，内置高精度语音分段模型。',
+  'en-US': 'Transcribes speech from audio or video into editable subtitles, with a bundled high-accuracy speech segmentation model.'
 }
 manifest.runtime.requirements = Array.from(new Set([
   ...manifest.runtime.requirements.filter(item => !/^silero-vad\b/i.test(item)),

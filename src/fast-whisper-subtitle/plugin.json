@@ -3,12 +3,12 @@
   "id": "local.fast-whisper-subtitle",
   "version": "0.1.0",
   "label": {
-    "zh-CN": "Lator 转写",
-    "en-US": "Lator Transcribe"
+    "zh-CN": "字幕转写",
+    "en-US": "Subtitle Transcription"
   },
   "description": {
-    "zh-CN": "使用本地转写模型，将音视频语音生成结构化字幕。",
-    "en-US": "Create structured subtitles from speech in media files with local transcription models."
+    "zh-CN": "将音频或视频中的人声转写为可编辑字幕，支持自动识别语言、按停顿断句和低置信度标记。",
+    "en-US": "Transcribes speech from audio or video into editable subtitles, with language detection, pause-based cue splitting, and low-confidence marking."
   },
   "runtime": {
     "type": "python",
@@ -93,7 +93,11 @@
           "baseUrl": "https://hf-mirror.com/Systran/faster-whisper-base/resolve/main",
           "id": "hf-mirror"
         }
-      ]
+      ],
+      "description": {
+        "zh-CN": "模型体积：约 145 MB。",
+        "en-US": "Model size: about 145 MB."
+      }
     },
     {
       "id": "faster-whisper-small",
@@ -102,8 +106,8 @@
         "en-US": "faster-whisper small"
       },
       "description": {
-        "zh-CN": "比 base 更准确，下载后可在识别弹窗中为本次音视频选择 small。",
-        "en-US": "More accurate than base. Download it, then select small in the recognition dialog for a media file."
+        "zh-CN": "模型体积：约 460 MB。",
+        "en-US": "Model size: about 460 MB."
       },
       "type": "huggingface",
       "storage": "models",
@@ -161,8 +165,8 @@
         "en-US": "faster-whisper medium"
       },
       "description": {
-        "zh-CN": "准确率和体积居中，下载后可在识别弹窗中为本次音视频选择 medium。",
-        "en-US": "A middle ground for accuracy and size. Download it, then select medium in the recognition dialog for a media file."
+        "zh-CN": "模型体积：约 1.5 GB。",
+        "en-US": "Model size: about 1.5 GB."
       },
       "type": "huggingface",
       "storage": "models",
@@ -220,8 +224,8 @@
         "en-US": "faster-whisper large-v3"
       },
       "description": {
-        "zh-CN": "更高准确率的大模型，下载后可在识别弹窗中为本次音视频选择 large-v3。",
-        "en-US": "A higher-accuracy large model. Download it, then select large-v3 in the recognition dialog for a media file."
+        "zh-CN": "模型体积：约 3.1 GB。",
+        "en-US": "Model size: about 3.1 GB."
       },
       "type": "huggingface",
       "storage": "models",
@@ -279,8 +283,8 @@
         "en-US": "faster-whisper large-v3 turbo"
       },
       "description": {
-        "zh-CN": "large-v3 turbo 的 CTranslate2 转换模型，下载后可在识别弹窗中为本次音视频选择 turbo。",
-        "en-US": "CTranslate2 conversion of large-v3 turbo. Download it, then select turbo in the recognition dialog for a media file."
+        "zh-CN": "模型体积：约 1.6 GB。",
+        "en-US": "Model size: about 1.6 GB."
       },
       "type": "huggingface",
       "storage": "models",
@@ -363,18 +367,18 @@
       "authorization": {
         "provider": "huggingface",
         "title": {
-          "zh-CN": "授权下载高精度 VAD 模型",
-          "en-US": "Authorize high-accuracy VAD model download"
+          "zh-CN": "授权下载高精度分段模型",
+          "en-US": "Authorize high-accuracy segmentation model"
         },
         "description": {
-          "zh-CN": "该模型需要先在 Hugging Face 登录并同意模型条款，然后输入可访问该模型的 token。",
-          "en-US": "This model requires signing in to Hugging Face, accepting the model terms, and entering a token that can access it."
+          "zh-CN": "高精度模式使用的 pyannote 模型需要先在 Hugging Face 同意条款，并提供可访问该模型的 token。",
+          "en-US": "The pyannote model used by High Accuracy mode requires accepting the Hugging Face terms and providing a token with access to the model."
         },
         "links": [
           {
             "label": {
-              "zh-CN": "打开模型授权页面",
-              "en-US": "Open model authorization page"
+              "zh-CN": "打开授权页面",
+              "en-US": "Open authorization page"
             },
             "url": "https://huggingface.co/pyannote/segmentation-3.0"
           }
@@ -450,27 +454,27 @@
         "id": "vadBackend",
         "type": "select",
         "title": {
-          "zh-CN": "语音分段引擎",
-          "en-US": "Voice segmentation engine"
+          "zh-CN": "语音分段模式",
+          "en-US": "Speech segmentation mode"
         },
         "description": {
-          "zh-CN": "标准模式安装更简单；高精度模式需要 Hugging Face 授权。",
-          "en-US": "Standard is easier to install. High accuracy requires Hugging Face authorization."
+          "zh-CN": "标准模式适合大多数文件；高精度模式分段更细，需要 Hugging Face 授权后下载模型。",
+          "en-US": "Standard works for most files. High Accuracy creates finer speech segments and requires a Hugging Face-authorized model download."
         },
         "default": "silero",
         "options": [
           {
             "value": "silero",
             "label": {
-              "zh-CN": "标准",
+              "zh-CN": "标准模式",
               "en-US": "Standard"
             }
           },
           {
             "value": "pyannote",
             "label": {
-              "zh-CN": "高精度",
-              "en-US": "High accuracy"
+              "zh-CN": "高精度模式",
+              "en-US": "High Accuracy"
             }
           }
         ]
@@ -480,8 +484,8 @@
       {
         "id": "fast-whisper",
         "title": {
-          "zh-CN": "语音转字幕",
-          "en-US": "Speech to Subtitles"
+          "zh-CN": "字幕转写",
+          "en-US": "Subtitle Transcription"
         },
         "capability": "transcribe-media",
         "retryCapability": "retry-subtitle-segment",
@@ -504,12 +508,12 @@
             "id": "model",
             "type": "select",
             "title": {
-              "zh-CN": "Whisper 模型",
-              "en-US": "Whisper model"
+              "zh-CN": "转写模型",
+              "en-US": "Transcription model"
             },
             "description": {
-              "zh-CN": "默认 base；更多模型可在设置中下载。",
-              "en-US": "Default: base. Download more models in Settings."
+              "zh-CN": "需要更高精度时，先在插件设置中下载更大的模型。",
+              "en-US": "For higher accuracy, download a larger model in plugin settings first."
             },
             "default": "base",
             "options": [
@@ -554,8 +558,8 @@
             "id": "language",
             "type": "select",
             "title": {
-              "zh-CN": "识别语言",
-              "en-US": "Recognition language"
+              "zh-CN": "语音语言",
+              "en-US": "Spoken language"
             },
             "default": "auto",
             "options": [
@@ -1268,20 +1272,20 @@
               }
             ],
             "description": {
-              "zh-CN": "自动按片段检测；选择语言则强制使用。",
-              "en-US": "Auto detects per segment; choose one to force it."
+              "zh-CN": "不确定时保持自动检测；已知语言时手动选择可提升稳定性。",
+              "en-US": "Keep Auto detect when unsure. Choosing a known language can improve stability."
             }
           },
           {
             "id": "outputLanguages",
             "type": "multi-select",
             "title": {
-              "zh-CN": "保留语言",
-              "en-US": "Keep languages"
+              "zh-CN": "保留语种",
+              "en-US": "Languages to keep"
             },
             "description": {
-              "zh-CN": "留空保留全部；仅自动检测时生效。",
-              "en-US": "Empty keeps all. Works only with Auto detect."
+              "zh-CN": "留空表示全部保留；只在自动检测语言时生效。",
+              "en-US": "Leave empty to keep all languages. Only applies when language detection is automatic."
             },
             "default": [],
             "options": [
@@ -1991,8 +1995,8 @@
             "id": "silenceThreshold",
             "type": "select",
             "title": {
-              "zh-CN": "断句间隔",
-              "en-US": "Cue split gap"
+              "zh-CN": "字幕分段间隔",
+              "en-US": "Subtitle split gap"
             },
             "default": "2.0",
             "options": [
@@ -2026,20 +2030,20 @@
               }
             ],
             "description": {
-              "zh-CN": "数值越大越合并，越小越细分。",
-              "en-US": "Larger values merge cues; smaller values split more."
+              "zh-CN": "间隔越长，字幕越容易合并；间隔越短，字幕切分越细。",
+              "en-US": "Longer gaps merge more subtitle cues; shorter gaps split them more finely."
             }
           },
           {
             "id": "strict",
             "type": "toggle",
             "title": {
-              "zh-CN": "质量标记",
-              "en-US": "Quality marking"
+              "zh-CN": "标记可疑字幕",
+              "en-US": "Mark uncertain subtitles"
             },
             "description": {
-              "zh-CN": "开启后用 <del> 标记低置信度字幕。",
-              "en-US": "Marks low-confidence subtitles with <del>."
+              "zh-CN": "开启后，低置信度结果会加删除标记，便于后续人工检查。",
+              "en-US": "When enabled, low-confidence results are marked with deletion mark for manual review."
             },
             "default": false
           }
@@ -2050,8 +2054,8 @@
       {
         "id": "fast-whisper-media-playback",
         "title": {
-          "zh-CN": "媒体片段播放",
-          "en-US": "Media Segment Playback"
+          "zh-CN": "字幕片段播放",
+          "en-US": "Subtitle Segment Playback"
         },
         "capability": "play-subtitle-segment"
       }
