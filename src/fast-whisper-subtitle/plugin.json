@@ -41,16 +41,6 @@
   ],
   "assets": [
     {
-      "id": "ffmpeg",
-      "type": "archive",
-      "storage": "tools",
-      "source": "https://evermeet.cx/ffmpeg/ffmpeg-8.1.1.zip",
-      "requiredFiles": [
-        "ffmpeg"
-      ],
-      "executable": true
-    },
-    {
       "id": "faster-whisper-base",
       "type": "huggingface",
       "storage": "models",

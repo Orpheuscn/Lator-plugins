@@ -6,7 +6,7 @@ from pathlib import Path
 
 def resolve_ffmpeg_binary() -> str:
     configured = (
-        os.environ.get("LATOR_PLUGIN_ASSET_FFMPEG")
+        os.environ.get("LATOR_HOST_FFMPEG")
         or os.environ.get("FFMPEG_BINARY")
         or ""
     ).strip()

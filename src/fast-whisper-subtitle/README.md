@@ -67,9 +67,8 @@ capability. Lator prepares cache output paths and URLs in `hostMedia`; the plugi
 cuts the requested time range with FFmpeg and returns `audioUrl` and, for video
 sources, `videoUrl`.
 
-FFmpeg is declared as a `tools` archive asset and is exposed to Python through
-`LATOR_PLUGIN_ASSET_FFMPEG`. The runtime falls back to `FFMPEG_BINARY` or `ffmpeg`
-on PATH if the asset is not installed.
+FFmpeg is provided by the Lator host through `LATOR_HOST_FFMPEG`. The runtime
+falls back to `FFMPEG_BINARY` or `ffmpeg` on PATH for standalone development.
 
 ## Dependencies
 
@@ -91,9 +90,8 @@ Transliteration dependencies from the original app (`pykakasi`, `aksharamukha`,
 `unidecode`) were removed. Flask and Flask-CORS were removed with the standalone
 web server.
 
-The plugin declares these model assets:
+The plugin declares these model assets. FFmpeg is intentionally not listed here because it is supplied by the host:
 
-- `ffmpeg` from `https://evermeet.cx/ffmpeg/ffmpeg-8.1.1.zip`
 - `Systran/faster-whisper-base` as the default required ASR model
 - optional on-demand ASR models: `Systran/faster-whisper-small`,
   `Systran/faster-whisper-medium`, `Systran/faster-whisper-large-v3`, and
