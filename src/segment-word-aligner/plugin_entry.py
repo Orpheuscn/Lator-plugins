@@ -29,6 +29,7 @@ except Exception:  # pragma: no cover - optional fallback.
 
 CAPABILITY_BUILD_WORD_ALIGNMENTS = "build-word-alignments"
 MODEL_ASSET_ENV = "LATOR_PLUGIN_ASSET_AWESOME_ALIGN_WITH_CO"
+INTERNAL_SETTINGS_ENV = "LATOR_SEGMENT_WORD_ALIGNER_SETTINGS"
 MODEL_ID = "aneuraz/awesome-align-with-co"
 DEFAULT_ALIGN_LAYER = 8
 DEFAULT_MAX_WORDPIECES = 510
@@ -785,7 +786,12 @@ def read_model_dir() -> Path:
 
 
 def read_settings() -> dict[str, Any]:
-    raw = os.environ.get("LATOR_PLUGIN_SETTINGS", "{}")
+    settings = parse_json_object(os.environ.get("LATOR_PLUGIN_SETTINGS", "{}"))
+    settings.update(parse_json_object(os.environ.get(INTERNAL_SETTINGS_ENV, "{}")))
+    return settings
+
+
+def parse_json_object(raw: str) -> dict[str, Any]:
     try:
         value = json.loads(raw)
     except json.JSONDecodeError:

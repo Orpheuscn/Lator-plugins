@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "local.fast-whisper-subtitle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "label": {
     "zh-CN": "字幕转写",
     "en-US": "Subtitle Transcription"
@@ -105,6 +105,10 @@
       "revision": "main",
       "shareKey": "huggingface:Systran/faster-whisper-small:main",
       "optional": true,
+      "when": {
+        "setting": "model",
+        "equals": "small"
+      },
       "files": [
         {
           "sourcePath": "config.json",
@@ -164,6 +168,10 @@
       "revision": "main",
       "shareKey": "huggingface:Systran/faster-whisper-medium:main",
       "optional": true,
+      "when": {
+        "setting": "model",
+        "equals": "medium"
+      },
       "files": [
         {
           "sourcePath": "config.json",
@@ -223,6 +231,10 @@
       "revision": "main",
       "shareKey": "huggingface:Systran/faster-whisper-large-v3:main",
       "optional": true,
+      "when": {
+        "setting": "model",
+        "equals": "large-v3"
+      },
       "files": [
         {
           "sourcePath": "config.json",
@@ -282,6 +294,10 @@
       "revision": "main",
       "shareKey": "huggingface:dropbox-dash/faster-whisper-large-v3-turbo:main",
       "optional": true,
+      "when": {
+        "setting": "model",
+        "equals": "turbo"
+      },
       "files": [
         {
           "sourcePath": "config.json",
@@ -353,30 +369,7 @@
           "baseUrl": "https://hf-mirror.com/pyannote/segmentation-3.0/resolve/main",
           "id": "hf-mirror"
         }
-      ],
-      "authorization": {
-        "provider": "huggingface",
-        "title": {
-          "zh-CN": "授权下载高精度分段模型",
-          "en-US": "Authorize high-accuracy segmentation model"
-        },
-        "description": {
-          "zh-CN": "高精度模式使用的 pyannote 模型需要先在 Hugging Face 同意条款，并提供可访问该模型的 token。",
-          "en-US": "The pyannote model used by High Accuracy mode requires accepting the Hugging Face terms and providing a token with access to the model."
-        },
-        "links": [
-          {
-            "label": {
-              "zh-CN": "打开授权页面",
-              "en-US": "Open authorization page"
-            },
-            "url": "https://huggingface.co/pyannote/segmentation-3.0"
-          }
-        ],
-        "validation": {
-          "filePath": "pytorch_model.bin"
-        }
-      }
+      ]
     },
     {
       "id": "language-id-voxlingua107-ecapa",
@@ -448,23 +441,23 @@
           "en-US": "Speech segmentation mode"
         },
         "description": {
-          "zh-CN": "标准模式适合大多数文件；高精度模式分段更细，需要 Hugging Face 授权后下载模型。",
-          "en-US": "Standard works for most files. High Accuracy creates finer speech segments and requires a Hugging Face-authorized model download."
+          "zh-CN": "默认使用 pyannote 高精度分段；需要更快或更轻量时可切换到 Silero。",
+          "en-US": "Uses pyannote high-accuracy segmentation by default. Switch to Silero for a faster lightweight fallback."
         },
-        "default": "silero",
+        "default": "pyannote",
         "options": [
-          {
-            "value": "silero",
-            "label": {
-              "zh-CN": "标准模式",
-              "en-US": "Standard"
-            }
-          },
           {
             "value": "pyannote",
             "label": {
               "zh-CN": "高精度模式",
               "en-US": "High Accuracy"
+            }
+          },
+          {
+            "value": "silero",
+            "label": {
+              "zh-CN": "标准模式",
+              "en-US": "Standard"
             }
           }
         ]
@@ -502,8 +495,8 @@
               "en-US": "Transcription model"
             },
             "description": {
-              "zh-CN": "需要更高精度时，先在插件设置中下载更大的模型。",
-              "en-US": "For higher accuracy, download a larger model in plugin settings first."
+              "zh-CN": "选择模型后，如果本地缺失，Lator 会在开始转写前自动下载。",
+              "en-US": "Choose a model here. If it is missing locally, Lator downloads it before transcription starts."
             },
             "default": "base",
             "options": [

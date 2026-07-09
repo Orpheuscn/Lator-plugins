@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "local.segment-word-aligner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "label": {
     "zh-CN": "语汇质检",
     "en-US": "Lexicon QA"
@@ -158,53 +158,6 @@
     }
   ],
   "contributes": {
-    "settings": [
-      {
-        "id": "includeWordAlignments",
-        "type": "toggle",
-        "title": {
-          "zh-CN": "包含词级语汇",
-          "en-US": "Include word-level terms"
-        },
-        "description": {
-          "zh-CN": "开启后保留非停用词的词级语汇条目；词组条目始终保留。",
-          "en-US": "When enabled, keeps non-stopword word-level term entries; phrase entries are always retained."
-        },
-        "default": true
-      },
-      {
-        "id": "maxPhraseSourceWords",
-        "type": "select",
-        "title": {
-          "zh-CN": "原文词组长度上限",
-          "en-US": "Source phrase length limit"
-        },
-        "default": "6",
-        "options": [
-          {
-            "value": "4",
-            "label": {
-              "zh-CN": "4",
-              "en-US": "4"
-            }
-          },
-          {
-            "value": "6",
-            "label": {
-              "zh-CN": "6",
-              "en-US": "6"
-            }
-          },
-          {
-            "value": "8",
-            "label": {
-              "zh-CN": "8",
-              "en-US": "8"
-            }
-          }
-        ]
-      }
-    ],
     "hostIndexSearchProviders": [
       {
         "id": "bilingual-alignment-search",

@@ -12,10 +12,16 @@ Lexicon QA adds a ribbon button to Lator that builds a reusable terminology inde
 
 ## User Controls
 
-The plugin contributes these settings:
+The plugin exposes one ribbon action. It does not expose tuning parameters in
+the Lator settings UI.
 
-- `Include word-level terms`: keeps non-stopword word-level term entries. Phrase entries are always retained.
-- `Source phrase length limit`: limits how many source words a phrase entry can contain. The default is `6`.
+The internal tuning parameters are reserved for development diagnostics:
+
+- `includeWordAlignments`: keeps non-stopword word-level term entries. Phrase entries are always retained. The default is `true`.
+- `maxPhraseSourceWords`: limits how many source words a phrase entry can contain. The default is `6`.
+
+For local debugging, set `LATOR_SEGMENT_WORD_ALIGNER_SETTINGS` to a JSON object,
+for example `{"includeWordAlignments":false,"maxPhraseSourceWords":"4"}`.
 
 The ribbon tooltip is `Lexicon QA`.
 

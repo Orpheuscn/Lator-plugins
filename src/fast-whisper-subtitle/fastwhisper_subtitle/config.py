@@ -10,5 +10,5 @@ DEFAULT_CONFIG = {
     "speech_pad": 300,
     "force_redetect": False,
     "allow_model_download": False,
-    "vad_backend": "silero",
+    "vad_backend": "pyannote",
 }

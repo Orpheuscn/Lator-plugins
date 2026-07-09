@@ -99,16 +99,15 @@ The plugin declares these model assets. FFmpeg is intentionally not listed here 
 - optional high-accuracy VAD model: `pyannote/segmentation-3.0`
 - `speechbrain/lang-id-voxlingua107-ecapa`
 
-Only `base` and the selected VAD backend are installed with the plugin. The
-larger faster-whisper models are shown in Lator settings as on-demand model
-downloads; after downloading one, select the matching `model` option (`small`,
-`medium`, `large-v3`, or `turbo`) in the media recognition dialog for the
-current audio or video file.
+Only `base` and the selected VAD backend are installed with the plugin. Larger
+faster-whisper models are selected from the `model` option (`small`, `medium`,
+`large-v3`, or `turbo`) in the media recognition dialog for the current audio or
+video file. If the selected model is missing locally, Lator downloads it before
+transcription starts.
 
-`pyannote/segmentation-3.0` may require the user to sign in to Hugging Face and
-accept the model terms before the host downloader can fetch it. Lator validates
-the pasted Hugging Face token before continuing and uses that token for the host
-download request.
+`pyannote/segmentation-3.0` is the default VAD model. Packaged marketplace
+releases mirror it through Lator's asset distribution, so the host does not show
+a Hugging Face authorization prompt for normal installation.
 
 If a model asset cannot be downloaded by the host, the caller can pass local
 model directories with `parameters.vadModelPath` and
@@ -117,7 +116,7 @@ directories work for those values.
 
 ## Bundle Packaging
 
-The bundle keeps the standard `vadBackend` setting so users can choose Silero or pyannote. The pyannote model has separate Hugging Face access terms, so users who choose High Accuracy mode must authorize and download that model through the normal Lator asset flow.
+The bundle keeps the standard `vadBackend` setting so users can choose pyannote or Silero. Pyannote is the default; Silero remains available as the lighter fallback.
 
 The examples assume:
 
@@ -130,7 +129,7 @@ cd "$HOST"
 
 ### Build a Bundle
 
-This command keeps the plugin source unchanged and includes every optional Python requirement group in the wheelhouse. Including `pyannote.audio` lets the High Accuracy mode work after the user separately authorizes and downloads the pyannote model.
+This command keeps the plugin source unchanged and includes every optional Python requirement group in the wheelhouse. Including `pyannote.audio` lets the default High Accuracy mode work after the host installs the pyannote model asset.
 
 ```bash
 npm run plugin:bundle -- "$PLUGIN" \
