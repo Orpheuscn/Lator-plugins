@@ -14,7 +14,6 @@ from typing import Any, Callable, Iterable, TypeVar
 
 from fastwhisper_subtitle.config import DEFAULT_CONFIG
 from fastwhisper_subtitle.services.audio import (
-    cut_audio_file,
     cut_audio_segment_memory,
     extract_audio,
     read_mono_audio,
@@ -82,75 +81,56 @@ def retry_subtitle_segment(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
         raise ValueError(f"Unsupported subtitle media retry mode: {mode}")
 
     config = build_config({**params, "mode": "transcribe"})
-    segment_id = read_string(params, "segmentId") or read_string(params, "segment_id")
-    start_seconds = read_required_float(params, "startSeconds")
-    end_seconds = read_required_float(params, "endSeconds")
-    start_time = read_string(params, "startTime") or seconds_to_srt_time(start_seconds)
-    end_time = read_string(params, "endTime") or seconds_to_srt_time(end_seconds)
-    if end_seconds <= start_seconds:
-        raise ValueError("Segment endSeconds must be greater than startSeconds.")
+    yield progress("prepare", f"Preparing selected clip: {Path(config.input_file).name}", 0, 0)
+    yield progress("model", f"Loading Whisper model: {config.model}", 0, 0)
+    from fastwhisper_subtitle.services.whisper import load_whisper_model, transcribe_with_whisper
 
-    with tempfile.TemporaryDirectory(prefix="lator-fast-whisper-retry-") as temp_dir:
-        segment_file = os.path.join(temp_dir, "retry_segment.wav")
-        yield progress("audio", "Cutting subtitle segment with ffmpeg", 0, 0)
-        call_with_plugin_logs(cut_audio_file, config.input_file, start_seconds, end_seconds, segment_file)
+    whisper_model = call_with_plugin_logs(
+        load_whisper_model,
+        config.model,
+        compute_type=config.compute_type,
+        allow_model_download=config.allow_model_download,
+    )
 
-        yield progress("model", f"Loading Whisper model: {config.model}", 0, 0)
-        from fastwhisper_subtitle.services.whisper import load_whisper_model, transcribe_with_whisper
-
-        whisper_model = call_with_plugin_logs(
-            load_whisper_model,
-            config.model,
-            compute_type=config.compute_type,
-            allow_model_download=config.allow_model_download,
+    yield progress("transcribe", "Recognizing selected clip with Whisper", 0, 1)
+    whisper_result = call_with_plugin_logs(
+        transcribe_with_whisper,
+        config.input_file,
+        config.language,
+        config.model,
+        whisper_model_instance=whisper_model,
+        beam_size=config.beam_size,
+        task=config.task,
+        compute_type=config.compute_type,
+        allow_model_download=config.allow_model_download,
+    )
+    segments = [
+        segment for segment in build_host_segments(
+            whisper_result,
+            0,
+            segment_id_offset=0,
+            enable_quality_filter=config.strict,
+            model=config.model,
         )
+        if not is_hallucination_text(str(segment.get("text", "")))
+    ]
+    if not segments:
+        raise RuntimeError("Whisper returned no subtitle segments for the selected clip.")
 
-        yield progress("transcribe", "Recognizing subtitle segment", 0, 1)
-        whisper_result = call_with_plugin_logs(
-            transcribe_with_whisper,
-            segment_file,
-            config.language,
-            config.model,
-            temp_dir,
-            whisper_model_instance=whisper_model,
-            beam_size=config.beam_size,
-            task=config.task,
-            compute_type=config.compute_type,
-            allow_model_download=config.allow_model_download,
-        )
-        text = normalize_retry_text(whisper_result)
-        if not text:
-            raise RuntimeError("Whisper returned no text for this subtitle segment.")
-        if is_hallucination_text(text):
-            raise RuntimeError("Whisper output matched the hallucination phrase filter.")
+    for index, segment in enumerate(segments, start=1):
+        yield {"type": "segment", "segment": segment}
+        yield progress("transcribe", f"Recognized {index}/{len(segments)} subtitle segments", index, len(segments))
 
-        segment: dict[str, Any] = {
-            "segmentId": segment_id,
-            "startSeconds": start_seconds,
-            "endSeconds": end_seconds,
-            "startTime": start_time,
-            "endTime": end_time,
-            "text": text,
-        }
-        confidence = estimate_retry_confidence(whisper_result)
-        if confidence is not None:
-            segment["confidence"] = confidence
-
-        yield progress("transcribe", "Recognized subtitle segment", 1, 1)
-        yield {
-            "type": "done",
-            "data": {
-                "projectId": config.project_id,
-                "media": {
-                    "sourcePath": config.input_file,
-                    "kind": infer_media_kind(config.input_file),
-                },
-                "segment": segment,
-                "detectedLanguage": normalize_detected_language(whisper_result.get("language")) or config.language,
-                "model": config.model,
-                "task": config.task,
-            },
-        }
+    detected_language = normalize_detected_language(whisper_result.get("language")) or config.language
+    result = build_result(
+        config=config,
+        segments=segments,
+        detected_language=detected_language,
+        language_stats={detected_language: len(segments)} if detected_language else {},
+        detected_speech_segments=1,
+        processed_speech_segments=1,
+    )
+    yield {"type": "done", "data": result}
 
 
 def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, Any]]:

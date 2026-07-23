@@ -13,6 +13,11 @@ persistence, subtitle table, editing, playback, and import flow.
 
 `transcribe-media` is declared as a `subtitle-media-import` capability.
 
+`retry-subtitle-segment` is reserved for a pre-cut audio clip. It skips both
+external VAD and SpeechBrain language segmentation, sends the complete clip
+directly to faster-whisper, and returns every timestamped Whisper segment. The
+host uses this capability when appending subtitles from a selected player range.
+
 Payload:
 
 ```json

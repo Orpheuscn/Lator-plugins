@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "local.fast-whisper-subtitle",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "label": {
     "zh-CN": "字幕转写",
     "en-US": "Subtitle Transcription"
