@@ -27,7 +27,7 @@ The ribbon tooltip is `Lexicon QA`.
 
 ## Output
 
-The plugin writes `word-alignments.json` through Lator's project batch output flow. Each segment includes an `entries` array. A typical entry looks like this:
+The plugin writes `word-alignments.json` through Lator's project batch output flow. Each segment includes an `entries` array. A typical aligned entry looks like this:
 
 ```json
 {
@@ -46,6 +46,11 @@ Entry fields:
 - `src_span` and `tgt_span`: character offsets in the original segment text.
 - `score`: alignment confidence score.
 - `alignment_type`: `phrase` or `word`.
+
+Tokens for which no retained alignment link exists are also indexed. They use
+`source_unaligned` or `target_unaligned`; the missing side's text and span are
+`null`. This keeps both sides searchable even when the alignment model cannot
+produce a pair.
 
 ## Alignment Pipeline
 

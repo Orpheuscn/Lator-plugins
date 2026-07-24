@@ -14,6 +14,8 @@ import transformers
 import stopwordsiso  # type: ignore
 from transformers import AutoModel, AutoTokenizer
 
+from unaligned_entries import build_unaligned_token_entries
+
 try:
     import hanlp  # type: ignore
 except Exception:  # pragma: no cover - optional fallback.
@@ -274,13 +276,13 @@ def build_segment_entries(
         target_language,
     )
     links = [link for link in links if link.score >= DEFAULT_MIN_WORD_SCORE]
-    if not links:
-        return []
-
-    units = build_translation_units(
-        links,
-        max_phrase_source_words=max_phrase_source_words,
-        max_phrase_target_words=max_phrase_target_words,
+    units = (
+        build_translation_units(
+            links,
+            max_phrase_source_words=max_phrase_source_words,
+            max_phrase_target_words=max_phrase_target_words,
+        )
+        if links else []
     )
 
     entries: list[dict[str, Any]] = []
@@ -306,7 +308,8 @@ def build_segment_entries(
             continue
         add_unique_entry(entries, seen, entry)
 
-    entries.sort(key=lambda item: (item["src_span"][0], item["src_span"][1], item["tgt_span"][0], item["alignment_type"]))
+    entries.extend(build_unaligned_token_entries(source_tokens, target_tokens, links))
+    entries.sort(key=alignment_entry_sort_key)
     return entries
 
 
@@ -419,23 +422,20 @@ def encode_side(tokenizer: Any, text: str, language_code: str, max_wordpieces: i
     tokens = tokenize_with_spans(text, language_code)
     pieces: list[int] = []
     word_ids: list[int] = []
-    kept_tokens: list[LexToken] = []
-    for token in tokens:
+    for token_index, token in enumerate(tokens):
         token_pieces = tokenizer.encode(token.text, add_special_tokens=False)
         if not token_pieces:
             continue
         if len(pieces) + len(token_pieces) > max_wordpieces:
             break
-        next_word_id = len(kept_tokens)
         pieces.extend(token_pieces)
-        word_ids.extend([next_word_id] * len(token_pieces))
-        kept_tokens.append(token)
+        word_ids.extend([token_index] * len(token_pieces))
 
     input_ids = torch.tensor(
         [tokenizer.cls_token_id, *pieces, tokenizer.sep_token_id],
         dtype=torch.long,
     )
-    return EncodedSide(tokens=kept_tokens, input_ids=input_ids, word_ids=word_ids)
+    return EncodedSide(tokens=tokens, input_ids=input_ids, word_ids=word_ids)
 
 
 def tokenize_with_spans(text: str, language_code: str = "") -> list[LexToken]:
@@ -707,6 +707,21 @@ def add_unique_entry(entries: list[dict[str, Any]], seen: set[tuple[int, int, in
         return
     seen.add(key)
     entries.append(entry)
+
+
+def alignment_entry_sort_key(entry: dict[str, Any]) -> tuple[int, int, int, int, str]:
+    source_span = entry.get("src_span")
+    target_span = entry.get("tgt_span")
+    source_start = source_span[0] if isinstance(source_span, list) else -1
+    source_end = source_span[1] if isinstance(source_span, list) else -1
+    target_start = target_span[0] if isinstance(target_span, list) else -1
+    return (
+        0 if isinstance(source_span, list) else 1,
+        source_start,
+        source_end,
+        target_start,
+        str(entry.get("alignment_type", "")),
+    )
 
 
 def all_stopwords(indexes: frozenset[int], tokens: list[LexToken], stopwords: set[str]) -> bool:
