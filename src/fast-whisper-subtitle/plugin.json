@@ -2004,8 +2004,8 @@
               {
                 "value": "pause",
                 "label": {
-                  "zh-CN": "停顿优先（旧行为）",
-                  "en-US": "Pause first (legacy)"
+                  "zh-CN": "停顿优先",
+                  "en-US": "Pause first"
                 }
               }
             ]

@@ -61,8 +61,8 @@ so Whisper keeps the existing speech context.
 
 `subtitleSegmentationMode` accepts `auto` (default), `readable`, and `pause`.
 `auto` limits word alignment to speech blocks that can create an overlong cue;
-`readable` requests it for every block; `pause` preserves the legacy
-pause-first output. `subtitleMaxDuration` is a 6, 7, or 8 second hard upper
+`readable` requests it for every block; `pause` prioritizes pauses when
+building output cues. `subtitleMaxDuration` is a 6, 7, or 8 second hard upper
 bound for the final subtitle cue in the first two modes.
 
 `silenceThreshold` is now explicitly a VAD speech-block merge gap. It is not a

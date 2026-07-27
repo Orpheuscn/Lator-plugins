@@ -86,7 +86,7 @@ class SubtitleSegmentationTests(unittest.TestCase):
         self.assertEqual("".join(cue["text"] for cue in cues), segment["text"])
         self.assertTrue(all(" " not in cue["text"] for cue in cues))
 
-    def test_keeps_short_and_legacy_segments_unchanged(self):
+    def test_keeps_already_readable_segments_unchanged(self):
         segment = {"start": 0, "end": 3, "text": "Already readable."}
 
         self.assertEqual(split_whisper_segment(segment, self.options), [segment])
