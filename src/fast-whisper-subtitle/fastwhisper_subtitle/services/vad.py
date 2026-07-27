@@ -6,30 +6,20 @@ from pyannote.audio.pipelines import VoiceActivityDetection
 
 from fastwhisper_subtitle.model_paths import resolve_vad_model_path
 from fastwhisper_subtitle.services.audio import read_mono_audio
+from fastwhisper_subtitle.services.speech_segments import merge_and_pad_speech_segments
 
 
 def merge_speech_segments_from_tuples(
     segments: List[Tuple[float, float]],
     silence_threshold_sec: float,
 ) -> List[Tuple[float, float]]:
-    if not segments:
-        return []
-
-    segments = sorted(segments, key=lambda x: x[0])
-    silence_threshold_ms = silence_threshold_sec * 1000
-    merged_segments = []
-    current_start, current_end = segments[0]
-
-    for i in range(1, len(segments)):
-        next_start, next_end = segments[i]
-        if (next_start - current_end) < silence_threshold_ms:
-            current_end = max(current_end, next_end)
-        else:
-            merged_segments.append((current_start, current_end))
-            current_start, current_end = next_start, next_end
-
-    merged_segments.append((current_start, current_end))
-    return merged_segments
+    # Kept as a compatibility helper for callers outside the plugin.
+    return merge_and_pad_speech_segments(
+        segments,
+        silence_threshold_sec,
+        speech_pad_ms=0,
+        audio_length_ms=float("inf"),
+    )
 
 
 def detect_continuous_speech_segments(
@@ -74,20 +64,20 @@ def detect_continuous_speech_segments(
     }
     vad_result = vad_pipeline(audio_data)
 
-    speech_segments = []
+    raw_speech_segments = []
     for segment, _, label in vad_result.itertracks(yield_label=True):
-        start_ms = max(0, segment.start * 1000 - speech_pad_ms)
-        end_ms = min(audio_length_ms, segment.end * 1000 + speech_pad_ms)
-        speech_segments.append((start_ms, end_ms))
+        raw_speech_segments.append((segment.start * 1000, segment.end * 1000))
 
-    if not speech_segments:
+    if not raw_speech_segments:
         print("未检测到任何语音")
         return []
 
-    print(f"检测到 {len(speech_segments)} 个语音片段")
-    merged_segments = merge_speech_segments_from_tuples(
-        speech_segments,
+    print(f"检测到 {len(raw_speech_segments)} 个语音片段")
+    merged_segments = merge_and_pad_speech_segments(
+        raw_speech_segments,
         silence_threshold_sec,
+        speech_pad_ms,
+        audio_length_ms,
     )
 
     print(f"\n合并后: {len(merged_segments)} 个连续语音片段")

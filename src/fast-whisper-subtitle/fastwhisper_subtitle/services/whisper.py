@@ -48,6 +48,7 @@ def transcribe_with_whisper(
     task: str = "transcribe",
     compute_type: Optional[str] = None,
     allow_model_download: bool = False,
+    word_timestamps: bool = False,
 ) -> Dict:
     """Transcribe audio with faster-whisper and return the common JSON shape."""
     if audio_array is not None:
@@ -87,6 +88,7 @@ def transcribe_with_whisper(
                 'beam_size': beam_size,
                 'task': task,
                 'vad_filter': False,
+                'word_timestamps': word_timestamps,
             }
 
             segments_generator, info = whisper_model.transcribe(**transcribe_kwargs)
@@ -103,6 +105,15 @@ def transcribe_with_whisper(
                     'compression_ratio': segment.compression_ratio,
                     'no_speech_prob': segment.no_speech_prob,
                 }
+                if word_timestamps:
+                    segment_dict['words'] = [
+                        {
+                            'start': word.start,
+                            'end': word.end,
+                            'word': word.word,
+                        }
+                        for word in (segment.words or [])
+                    ]
 
                 segments_list.append(segment_dict)
                 full_text_parts.append(segment.text)

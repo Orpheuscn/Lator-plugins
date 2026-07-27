@@ -15,8 +15,9 @@ persistence, subtitle table, editing, playback, and import flow.
 
 `retry-subtitle-segment` is reserved for a pre-cut audio clip. It skips both
 external VAD and SpeechBrain language segmentation, sends the complete clip
-directly to faster-whisper, and returns every timestamped Whisper segment. The
-host uses this capability when appending subtitles from a selected player range.
+directly to faster-whisper, and returns readable subtitle cues derived from its
+timestamps. The host uses this capability when appending subtitles from a
+selected player range.
 
 Payload:
 
@@ -33,6 +34,8 @@ Payload:
     "computeType": "default",
     "silenceThreshold": 2.0,
     "speechPad": 300,
+    "subtitleSegmentationMode": "auto",
+    "subtitleMaxDuration": 7,
     "strict": false,
     "forceRedetect": false,
     "vadModelPath": "/optional/local/pyannote-segmentation-3.0",
@@ -46,6 +49,25 @@ Known hallucination phrases from
 `fastwhisper_subtitle/data/hallucination_phrases.json` are always filtered.
 `strict` only controls experimental low-confidence subtitle marking with `<del>`
 using thresholds from `fastwhisper_subtitle/data/quality_profiles.json`.
+
+## Subtitle cue splitting
+
+VAD determines which parts of a media file contain speech; it does not decide
+the final reading layout. In `auto` mode, speech blocks that can exceed the
+configured cue length request Whisper word timestamps during their original
+transcription. The plugin then splits only the output at punctuation, word gaps,
+or a hard duration/length limit. The audio is not re-transcribed in short clips,
+so Whisper keeps the existing speech context.
+
+`subtitleSegmentationMode` accepts `auto` (default), `readable`, and `pause`.
+`auto` limits word alignment to speech blocks that can create an overlong cue;
+`readable` requests it for every block; `pause` preserves the legacy
+pause-first output. `subtitleMaxDuration` is a 6, 7, or 8 second hard upper
+bound for the final subtitle cue in the first two modes.
+
+`silenceThreshold` is now explicitly a VAD speech-block merge gap. It is not a
+replacement for cue splitting in uninterrupted speech. Both pyannote and Silero
+apply it before the shared recognition padding is added.
 
 Events:
 

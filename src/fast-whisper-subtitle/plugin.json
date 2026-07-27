@@ -1975,11 +1975,83 @@
             ]
           },
           {
+            "id": "subtitleSegmentationMode",
+            "type": "select",
+            "title": {
+              "zh-CN": "字幕切分方式",
+              "en-US": "Subtitle cue splitting"
+            },
+            "description": {
+              "zh-CN": "自动模式仅对可能生成长字幕的连续语音启用词级对齐；不会将音频切成短片段重新识别。",
+              "en-US": "Auto mode uses word alignment only for speech blocks that can produce long cues; it does not re-transcribe short audio clips."
+            },
+            "default": "auto",
+            "options": [
+              {
+                "value": "auto",
+                "label": {
+                  "zh-CN": "自动（推荐）",
+                  "en-US": "Auto (recommended)"
+                }
+              },
+              {
+                "value": "readable",
+                "label": {
+                  "zh-CN": "可读性优先",
+                  "en-US": "Readability first"
+                }
+              },
+              {
+                "value": "pause",
+                "label": {
+                  "zh-CN": "停顿优先（旧行为）",
+                  "en-US": "Pause first (legacy)"
+                }
+              }
+            ]
+          },
+          {
+            "id": "subtitleMaxDuration",
+            "type": "select",
+            "title": {
+              "zh-CN": "单条字幕最长时长",
+              "en-US": "Maximum cue duration"
+            },
+            "description": {
+              "zh-CN": "超出该时长时，插件会在词边界、标点或短停顿处分成多条字幕。",
+              "en-US": "Longer speech is split at word boundaries, punctuation, or short pauses."
+            },
+            "default": "7",
+            "options": [
+              {
+                "value": "6",
+                "label": {
+                  "zh-CN": "6 秒",
+                  "en-US": "6 s"
+                }
+              },
+              {
+                "value": "7",
+                "label": {
+                  "zh-CN": "7 秒（推荐）",
+                  "en-US": "7 s (recommended)"
+                }
+              },
+              {
+                "value": "8",
+                "label": {
+                  "zh-CN": "8 秒",
+                  "en-US": "8 s"
+                }
+              }
+            ]
+          },
+          {
             "id": "silenceThreshold",
             "type": "select",
             "title": {
-              "zh-CN": "字幕分段间隔",
-              "en-US": "Subtitle split gap"
+              "zh-CN": "VAD 合并静音间隔",
+              "en-US": "VAD merge silence gap"
             },
             "default": "2.0",
             "options": [
@@ -2013,8 +2085,8 @@
               }
             ],
             "description": {
-              "zh-CN": "间隔越长，字幕越容易合并；间隔越短，字幕切分越细。",
-              "en-US": "Longer gaps merge more subtitle cues; shorter gaps split them more finely."
+              "zh-CN": "仅决定相邻语音块何时合并，不负责连续讲话中的最终字幕断句。",
+              "en-US": "Controls VAD speech-block merging only; final cue splitting handles continuous speech separately."
             }
           },
           {

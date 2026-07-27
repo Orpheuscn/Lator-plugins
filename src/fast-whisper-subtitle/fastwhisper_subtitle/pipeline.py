@@ -19,6 +19,11 @@ from fastwhisper_subtitle.services.audio import (
     read_mono_audio,
 )
 from fastwhisper_subtitle.services.srt import seconds_to_srt_time, segments_to_srt
+from fastwhisper_subtitle.services.subtitle_segmentation import (
+    SubtitleSegmentationOptions,
+    should_request_word_timestamps,
+    split_whisper_segments,
+)
 from fastwhisper_subtitle.storage.cache import (
     check_segment_completed,
     load_existing_result,
@@ -47,6 +52,8 @@ class TranscriptionConfig:
     strict: bool = DEFAULT_CONFIG["strict"]
     silence_threshold: float = DEFAULT_CONFIG["silence_threshold"]
     speech_pad: int = DEFAULT_CONFIG["speech_pad"]
+    subtitle_segmentation_mode: str = DEFAULT_CONFIG["subtitle_segmentation_mode"]
+    subtitle_max_duration: float = DEFAULT_CONFIG["subtitle_max_duration"]
     force_redetect: bool = DEFAULT_CONFIG["force_redetect"]
     temp_dir: str | None = None
     vad_model_path: str | None = None
@@ -103,6 +110,7 @@ def retry_subtitle_segment(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
         task=config.task,
         compute_type=config.compute_type,
         allow_model_download=config.allow_model_download,
+        word_timestamps=config.subtitle_segmentation_mode != "pause",
     )
     segments = [
         segment for segment in build_host_segments(
@@ -111,6 +119,8 @@ def retry_subtitle_segment(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
             segment_id_offset=0,
             enable_quality_filter=config.strict,
             model=config.model,
+            subtitle_segmentation_mode=config.subtitle_segmentation_mode,
+            subtitle_max_duration=config.subtitle_max_duration,
         )
         if not is_hallucination_text(str(segment.get("text", "")))
     ]
@@ -223,9 +233,18 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
             total_segments,
         )
 
+        word_timestamps_required = should_request_word_timestamps(
+            config.subtitle_segmentation_mode,
+            (end_ms - start_ms) / 1000,
+            config.subtitle_max_duration,
+        )
+        whisper_result: dict[str, Any] | None = None
         if check_segment_completed(index, config.temp_dir):
-            whisper_result = call_with_plugin_logs(load_existing_result, index, config.temp_dir)
-        else:
+            cached_result = call_with_plugin_logs(load_existing_result, index, config.temp_dir)
+            if not word_timestamps_required or has_word_timestamps(cached_result):
+                whisper_result = cached_result
+
+        if whisper_result is None:
             segment_file = os.path.join(config.temp_dir, f"segment_{index:04d}.wav")
             segment_array = cut_audio_segment_memory(
                 full_waveform,
@@ -252,6 +271,7 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
                 task=config.task,
                 compute_type=config.compute_type,
                 allow_model_download=config.allow_model_download,
+                word_timestamps=word_timestamps_required,
             )
 
         detected_language = normalize_detected_language(whisper_result.get("language"))
@@ -272,6 +292,8 @@ def transcribe_with_temp_dir(config: TranscriptionConfig) -> Iterable[dict[str, 
             segment_id_offset=len(host_segments),
             enable_quality_filter=config.strict,
             model=config.model,
+            subtitle_segmentation_mode=config.subtitle_segmentation_mode,
+            subtitle_max_duration=config.subtitle_max_duration,
         )
         for segment in new_segments:
             host_segments.append(segment)
@@ -328,6 +350,23 @@ def build_config(params: dict[str, Any]) -> TranscriptionConfig:
             DEFAULT_CONFIG["silence_threshold"],
         ),
         speech_pad=read_positive_int(read_parameter(parameter_values, "speechPad", DEFAULT_CONFIG["speech_pad"]), DEFAULT_CONFIG["speech_pad"]),
+        subtitle_segmentation_mode=normalize_choice(
+            read_parameter(
+                parameter_values,
+                "subtitleSegmentationMode",
+                DEFAULT_CONFIG["subtitle_segmentation_mode"],
+            ),
+            {"auto", "pause", "readable"},
+            DEFAULT_CONFIG["subtitle_segmentation_mode"],
+        ),
+        subtitle_max_duration=read_positive_float(
+            read_parameter(
+                parameter_values,
+                "subtitleMaxDuration",
+                DEFAULT_CONFIG["subtitle_max_duration"],
+            ),
+            DEFAULT_CONFIG["subtitle_max_duration"],
+        ),
         force_redetect=read_bool(read_parameter(parameter_values, "forceRedetect", DEFAULT_CONFIG["force_redetect"])),
         temp_dir=read_clean_string(params.get("tempDir") or params.get("cacheDir")),
         vad_model_path=read_clean_string(read_parameter(parameter_values, "vadModelPath", "")) or None,
@@ -418,10 +457,17 @@ def build_host_segments(
     segment_id_offset: int,
     enable_quality_filter: bool,
     model: str,
+    subtitle_segmentation_mode: str = DEFAULT_CONFIG["subtitle_segmentation_mode"],
+    subtitle_max_duration: float = DEFAULT_CONFIG["subtitle_max_duration"],
 ) -> list[dict[str, Any]]:
     quality_profile = resolve_quality_profile(model)
     host_segments: list[dict[str, Any]] = []
-    for segment in whisper_result.get("segments", []):
+    segmentation_options = SubtitleSegmentationOptions(
+        mode=subtitle_segmentation_mode,
+        max_duration_seconds=subtitle_max_duration,
+        target_duration_seconds=min(4.5, max(1.0, subtitle_max_duration - 1.0)),
+    )
+    for segment in split_whisper_segments(whisper_result.get("segments", []), segmentation_options):
         if not isinstance(segment, dict):
             continue
 
@@ -448,6 +494,13 @@ def build_host_segments(
             host_segment["confidence"] = confidence
         host_segments.append(host_segment)
     return host_segments
+
+
+def has_word_timestamps(whisper_result: dict[str, Any]) -> bool:
+    return any(
+        isinstance(segment, dict) and "words" in segment
+        for segment in whisper_result.get("segments", [])
+    )
 
 
 def is_quality_segment(segment: dict[str, Any], profile: dict[str, Any]) -> bool:
@@ -666,6 +719,8 @@ def build_raw_transcription_file(
             "vadBackend": config.vad_backend,
             "silenceThreshold": config.silence_threshold,
             "speechPad": config.speech_pad,
+            "subtitleSegmentationMode": config.subtitle_segmentation_mode,
+            "subtitleMaxDuration": config.subtitle_max_duration,
             "detectedLanguage": result.get("detectedLanguage"),
             "languageStats": result.get("languageStats"),
             "detectedSpeechSegments": result.get("detectedSpeechSegments"),

@@ -8,6 +8,8 @@ DEFAULT_CONFIG = {
     "strict": False,
     "silence_threshold": 2.0,
     "speech_pad": 300,
+    "subtitle_segmentation_mode": "auto",
+    "subtitle_max_duration": 7.0,
     "force_redetect": False,
     "allow_model_download": False,
     "vad_backend": "pyannote",
