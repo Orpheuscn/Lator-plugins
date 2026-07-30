@@ -482,7 +482,7 @@ def build_host_segments(
         start_seconds = (segment_start_ms / 1000) + float(segment.get("start", 0))
         end_seconds = (segment_start_ms / 1000) + float(segment.get("end", 0))
         host_segment: dict[str, Any] = {
-            "segmentId": str(segment_id_offset + len(host_segments) + 1),
+            "sourceItemId": str(segment_id_offset + len(host_segments) + 1),
             "startSeconds": start_seconds,
             "endSeconds": end_seconds,
             "startTime": seconds_to_srt_time(start_seconds),

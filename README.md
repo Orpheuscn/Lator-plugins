@@ -9,7 +9,7 @@ This repository currently contains four maintained plugins. Each plugin lives un
 | Plugin | Version | Display name | License | What it does |
 |---|---:|---|---|---|
 | [bilingual-align](src/bilingual-align) | 0.1.0 | Bilingual Align | GPL-3.0 | Aligns translated text back to the source line layout with LaBSE embeddings and N:M alignment. |
-| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.3 | Subtitle Transcription | GPL-3.0 | Transcribes speech from audio or video into editable subtitles using local faster-whisper models. |
+| [fast-whisper-subtitle](src/fast-whisper-subtitle) | 0.1.4 | Subtitle Transcription | GPL-3.0 | Transcribes speech from audio or video into editable subtitles using local faster-whisper models. |
 | [segment-word-aligner](src/segment-word-aligner) | 0.1.3 | Lexicon QA | GPL-3.0 | Extracts reusable source and translation term pairs for terminology consistency checks. |
 | [text-transliteration](src/text-transliteration) | 0.1.0 | Text Transliteration | GPL-3.0 | Transliterates non-Latin text into Latin letters for subtitles, terms, and plain text. |
 

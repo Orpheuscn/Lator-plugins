@@ -73,7 +73,7 @@ Events:
 
 ```json
 {"type":"progress","stage":"transcribe","message":"Recognized 12 subtitle segments","current":12,"total":0}
-{"type":"segment","segment":{"startTime":"00:00:01,000","endTime":"00:00:03,500","text":"..."}}
+{"type":"segment","segment":{"sourceItemId":"1","startTime":"00:00:01,000","endTime":"00:00:03,500","text":"..."}}
 ```
 
 Final result:
@@ -82,12 +82,15 @@ Final result:
 {
   "media": {"sourcePath": "/absolute/path/to/media.mp4", "kind": "video"},
   "segments": [
-    {"startTime": "00:00:01,000", "endTime": "00:00:03,500", "text": "..."}
+    {"sourceItemId": "1", "startTime": "00:00:01,000", "endTime": "00:00:03,500", "text": "..."}
   ],
   "srt": "1\n00:00:01,000 --> 00:00:03,500\n...",
   "detectedLanguage": "en"
 }
 ```
+
+`sourceItemId` only correlates streaming events with the final import result.
+The Lator host allocates the project-owned stable segment identity.
 
 The plugin also declares `play-subtitle-segment` as a `subtitle-playback`
 capability. Lator prepares cache output paths and URLs in `hostMedia`; the plugin
