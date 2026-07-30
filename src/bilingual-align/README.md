@@ -105,7 +105,7 @@ LABSE_ONNX_DIR=/path/to/labse-onnx
 Lator installs Python dependencies into the plugin virtual environment. For manual testing, install them in a virtual environment and include the required trusted hosts:
 
 ```bash
-python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org numpy 'onnxruntime>=1.15.0' 'transformers>=4.30.0'
+python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org numpy 'onnxruntime>=1.15.0' 'transformers>=4.30.0,<5'
 ```
 
 ## Notes for Maintainers
