@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "local.segment-word-aligner",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "label": {
     "zh-CN": "语汇质检",
     "en-US": "Lexicon QA"
@@ -190,7 +190,7 @@
         "capability": "build-word-alignments",
         "projectBatch": {
           "scope": "active-root-projects",
-          "payload": "translation-segments-v1",
+          "payload": "translation-segments-v2",
           "outputFile": "word-alignments.json",
           "serial": true,
           "openProject": true,

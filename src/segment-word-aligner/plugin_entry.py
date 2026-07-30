@@ -14,6 +14,7 @@ import transformers
 import stopwordsiso  # type: ignore
 from transformers import AutoModel, AutoTokenizer
 
+from segment_payload import Segment, collect_segments
 from unaligned_entries import build_unaligned_token_entries
 
 try:
@@ -53,14 +54,6 @@ SUDACHI_JA_SPLIT_MODE_ENV = "LATOR_SUDACHI_JA_SPLIT_MODE"
 
 hanlp_zh_tokenizer: Any | None = None
 sudachi_ja_tokenizer: Any | None = None
-
-
-@dataclass(frozen=True)
-class Segment:
-    segment_id: str
-    segment_index: int
-    source_text: str
-    translated_text: str
 
 
 @dataclass(frozen=True)
@@ -216,6 +209,7 @@ def build_word_alignments(params: dict[str, Any]) -> Iterable[dict[str, Any]]:
         aligned_segments.append({
             "segmentId": segment.segment_id,
             "segmentIndex": segment.segment_index,
+            "displayLabel": segment.display_label,
             "sourceText": segment.source_text,
             "targetText": segment.translated_text,
             "entries": entries,
@@ -660,43 +654,6 @@ def is_cjk_char(char: str) -> bool:
 
 def contains_phrase_break(text: str) -> bool:
     return any(char in ",，;；:：!?！？()（）[]【】{}《》<>—" for char in text)
-
-
-def collect_segments(params: dict[str, Any]) -> list[Segment]:
-    raw_segments = params.get("segments")
-    if isinstance(raw_segments, list):
-        segments = [normalize_segment(item, index) for index, item in enumerate(raw_segments)]
-        return [segment for segment in segments if segment is not None]
-
-    segment = normalize_segment(params, 0)
-    return [segment] if segment is not None else []
-
-
-def normalize_segment(value: Any, fallback_index: int) -> Segment | None:
-    if not isinstance(value, dict):
-        return None
-
-    segment_id = read_string(value, "segmentId") or read_string(value, "segment_id") or str(fallback_index + 1)
-    source_text = read_string(value, "sourceText") or read_string(value, "source_text") or ""
-    translated_text = (
-        read_string(value, "translatedText") or
-        read_string(value, "targetText") or
-        read_string(value, "translated_text") or
-        ""
-    )
-    if not source_text.strip() or not translated_text.strip():
-        return None
-
-    segment_index = value.get("segmentIndex", value.get("segment_index", fallback_index))
-    if not isinstance(segment_index, int):
-        segment_index = fallback_index
-
-    return Segment(
-        segment_id=segment_id,
-        segment_index=segment_index,
-        source_text=source_text,
-        translated_text=translated_text,
-    )
 
 
 def add_unique_entry(entries: list[dict[str, Any]], seen: set[tuple[int, int, int, int, str]], entry: dict[str, Any]) -> None:
